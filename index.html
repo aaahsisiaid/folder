@@ -2,63 +2,75 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>フォルダ構造 → ZIP 自動生成（修正版）</title>
+<title>フォルダ構成 → ZIP 生成ツール</title>
 <style>
-    body { font-family: sans-serif; padding: 20px; }
-    textarea { width: 100%; height: 200px; }
-    button { margin-top: 10px; padding: 10px 20px; font-size: 16px; }
+body { font-family: sans-serif; padding: 20px; }
+textarea { width: 100%; height: 300px; font-family: monospace; }
+button {
+  margin-top: 10px; padding: 10px 20px;
+  font-size: 16px; cursor: pointer;
+}
 </style>
 </head>
 <body>
 
-<h2>フォルダ構造 → ZIP 自動生成（修正版）</h2>
+<h2>フォルダ構成 → ZIP 自動生成</h2>
+<p>フォルダ構成を貼り付けて「ZIP生成」を押すだけ！</p>
 
-<textarea id="tree"></textarea>
-<button onclick="generateZip()">ZIP を生成</button>
+<textarea id="input" placeholder="例：
+LockIDController/
+├─ build.gradle
+├─ settings.gradle
+├─ src/
+│  └─ main/
+│      ├─ java/com/example/lockid/...（大量のJavaファイル）
+│      └─ resources/plugin.yml
+├─ config.yml
+└─ README.md"></textarea>
 
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<button onclick="generateZip()">ZIP生成</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
 function generateZip() {
-    const text = document.getElementById("tree").value;
+    const text = document.getElementById("input").value;
+    if (!text.trim()) {
+        alert("フォルダ構成を入力してください！");
+        return;
+    }
+
     const zip = new JSZip();
 
-    const lines = text.split("\n").map(l => l.replace(/\r/g, "")); 
-    let currentPaths = [];
+    // 行ごとに処理
+    const lines = text.split("\n");
 
-    lines.forEach(line => {
-        if (!line.trim()) return;
+    for (let line of lines) {
+        line = line.trim();
 
-        // ▼ 階層（インデント）を数える（装飾無視）
-        let depth = (line.match(/ /g) || []).length / 4;
+        // 空行スキップ
+        if (!line) continue;
 
-        // ▼ 装飾系文字を全部除去
-        const clean = line
-            .replace(/[│└├─＿―\s]+/g, "") // ←全部無視！
-            .trim();
+        // 見た目の記号を除去
+        line = line.replace(/^[├─└│\s]+/g, "");
 
-        if (!clean) return;
-        if (clean.includes("...")) return;
+        // 省略記号「...」を無視
+        if (line.includes("...")) continue;
 
-        currentPaths = currentPaths.slice(0, depth);
-        currentPaths[depth] = clean;
-
-        const fullPath = currentPaths.join("/");
-
-        if (clean.endsWith("/")) {
-            zip.folder(fullPath);
+        // フォルダ判定（末尾が /）
+        if (line.endsWith("/")) {
+            zip.folder(line.slice(0, -1));
         } else {
-            zip.file(fullPath, ""); // 空ファイル
+            zip.file(line, ""); // 中身は空
         }
-    });
+    }
 
-    zip.generateAsync({type:"blob"})
-        .then(blob => {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = "generated.zip";
-            a.click();
-        });
+    zip.generateAsync({ type: "blob" }).then(function (content) {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(content);
+        a.download = "generated.zip";
+        a.click();
+    });
 }
 </script>
 
