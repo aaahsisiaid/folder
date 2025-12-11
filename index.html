@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>フォルダ構造 → ZIP 自動生成</title>
+<title>フォルダ構造 → ZIP 自動生成（修正版）</title>
 <style>
     body { font-family: sans-serif; padding: 20px; }
     textarea { width: 100%; height: 200px; }
@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<h2>フォルダ構造 → ZIP</h2>
+<h2>フォルダ構造 → ZIP 自動生成（修正版）</h2>
 
 <textarea id="tree"></textarea>
 <button onclick="generateZip()">ZIP を生成</button>
@@ -23,39 +23,42 @@ function generateZip() {
     const text = document.getElementById("tree").value;
     const zip = new JSZip();
 
-    const lines = text.split("\n").map(l => l.replace(/\r/g, ""));
+    const lines = text.split("\n").map(l => l.replace(/\r/g, "")); 
     let currentPaths = [];
 
     lines.forEach(line => {
         if (!line.trim()) return;
 
-        // 行レベル計算
-        let clean = line.replace(/[│└├─\s]+/g, "");
-        let depth = (line.match(/│|├|└/g) || []).length;
+        // ▼ 階層（インデント）を数える（装飾無視）
+        let depth = (line.match(/ /g) || []).length / 4;
 
-        // 階層調整
+        // ▼ 装飾系文字を全部除去
+        const clean = line
+            .replace(/[│└├─＿―\s]+/g, "") // ←全部無視！
+            .trim();
+
+        if (!clean) return;
+        if (clean.includes("...")) return;
+
         currentPaths = currentPaths.slice(0, depth);
         currentPaths[depth] = clean;
 
-        // fullPath
         const fullPath = currentPaths.join("/");
-
-        // ...（大量ファイル表現）は無視
-        if (clean.includes("...")) return;
 
         if (clean.endsWith("/")) {
             zip.folder(fullPath);
         } else {
-            zip.file(fullPath, "");
+            zip.file(fullPath, ""); // 空ファイル
         }
     });
 
-    zip.generateAsync({type:"blob"}).then(blob => {
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "generated.zip";
-        a.click();
-    });
+    zip.generateAsync({type:"blob"})
+        .then(blob => {
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "generated.zip";
+            a.click();
+        });
 }
 </script>
 
