@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>フォルダ構造 → ZIP 自動生成</title>
+<style>
+    body { font-family: sans-serif; padding: 20px; }
+    textarea { width: 100%; height: 200px; }
+    button { margin-top: 10px; padding: 10px 20px; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<h2>フォルダ構造 → ZIP 自動生成</h2>
+<p>以下のような構造を入力すると ZIP が生成されます：</p>
+
+<pre>
+LockIDController/
+├─ build.gradle
+├─ settings.gradle
+├─ src/
+│  └─ main/
+│      ├─ java/com/example/lockid/...（大量のJavaファイル）
+│      └─ resources/plugin.yml
+├─ config.yml
+└─ README.md
+</pre>
+
+<textarea id="tree"></textarea>
+<button onclick="generateZip()">ZIP を生成</button>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+<script>
+function generateZip() {
+    const text = document.getElementById("tree").value;
+    const zip = new JSZip();
+
+    const lines = text.split("\n").map(l => l.replace(/\r/g, "")); 
+    let currentPaths = [""];
+
+    lines.forEach(line => {
+        if (!line.trim()) return;
+
+        // 行の階層を計算（"│  └─" などの装飾を除去）
+        let clean = line.replace(/[│└├─\s]+/g, "");
+        let depth = (line.match(/│|├|└/g) || []).length;
+
+        // 現在のパスを調整
+        currentPaths = currentPaths.slice(0, depth + 1);
+        currentPaths[depth] = clean;
+
+        // フルパス生成
+        const fullPath = currentPaths.filter(p => p).join("/");
+
+        // 「...」が入っていたらスキップ（ファイル大量表現）
+        if (clean.includes("...")) return;
+
+        // "/"で終わっていたらディレクトリ
+        if (clean.endsWith("/")) {
+            zip.folder(fullPath);
+        } else {
+            zip.file(fullPath, ""); // 中身は空
+        }
+    });
+
+    zip.generateAsync({type:"blob"})
+        .then(blob => {
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "generated.zip";
+            a.click();
+        });
+}
+</script>
+
+</body>
+</html>
