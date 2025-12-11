@@ -12,19 +12,6 @@
 <body>
 
 <h2>フォルダ構造 → ZIP 自動生成</h2>
-<p>以下のような構造を入力すると ZIP が生成されます：</p>
-
-<pre>
-LockIDController/
-├─ build.gradle
-├─ settings.gradle
-├─ src/
-│  └─ main/
-│      ├─ java/com/example/lockid/...（大量のJavaファイル）
-│      └─ resources/plugin.yml
-├─ config.yml
-└─ README.md
-</pre>
 
 <textarea id="tree"></textarea>
 <button onclick="generateZip()">ZIP を生成</button>
@@ -37,30 +24,31 @@ function generateZip() {
     const zip = new JSZip();
 
     const lines = text.split("\n").map(l => l.replace(/\r/g, "")); 
-    let currentPaths = [""];
+    let pathStack = [];
 
     lines.forEach(line => {
         if (!line.trim()) return;
 
-        // 行の階層を計算（"│  └─" などの装飾を除去）
-        let clean = line.replace(/[│└├─\s]+/g, "");
-        let depth = (line.match(/│|├|└/g) || []).length;
+        // 装飾文字を除去しファイル名だけ抜く
+        let name = line.replace(/[│├└─]+/g, "").trim();
 
-        // 現在のパスを調整
-        currentPaths = currentPaths.slice(0, depth + 1);
-        currentPaths[depth] = clean;
+        // "..." を含む場合はスキップ
+        if (name.includes("...")) return;
 
-        // フルパス生成
-        const fullPath = currentPaths.filter(p => p).join("/");
+        // 階層深度を計算（│ の数ではなく先頭の空白でカウント）
+        const depth = (line.match(/^\s+/) || [""])[0].length / 4;
 
-        // 「...」が入っていたらスキップ（ファイル大量表現）
-        if (clean.includes("...")) return;
+        // スタックを現在の深さに調整
+        pathStack = pathStack.slice(0, depth);
+        pathStack[depth] = name;
 
-        // "/"で終わっていたらディレクトリ
-        if (clean.endsWith("/")) {
+        const fullPath = pathStack.join("/");
+
+        // ディレクトリか判定
+        if (name.endsWith("/")) {
             zip.folder(fullPath);
         } else {
-            zip.file(fullPath, ""); // 中身は空
+            zip.file(fullPath, ""); // 空ファイル
         }
     });
 
