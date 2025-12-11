@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<h2>フォルダ構造 → ZIP 自動生成</h2>
+<h2>フォルダ構造 → ZIP</h2>
 
 <textarea id="tree"></textarea>
 <button onclick="generateZip()">ZIP を生成</button>
@@ -23,42 +23,39 @@ function generateZip() {
     const text = document.getElementById("tree").value;
     const zip = new JSZip();
 
-    const lines = text.split("\n").map(l => l.replace(/\r/g, "")); 
-    let pathStack = [];
+    const lines = text.split("\n").map(l => l.replace(/\r/g, ""));
+    let currentPaths = [];
 
     lines.forEach(line => {
         if (!line.trim()) return;
 
-        // 装飾文字を除去しファイル名だけ抜く
-        let name = line.replace(/[│├└─]+/g, "").trim();
+        // 行レベル計算
+        let clean = line.replace(/[│└├─\s]+/g, "");
+        let depth = (line.match(/│|├|└/g) || []).length;
 
-        // "..." を含む場合はスキップ
-        if (name.includes("...")) return;
+        // 階層調整
+        currentPaths = currentPaths.slice(0, depth);
+        currentPaths[depth] = clean;
 
-        // 階層深度を計算（│ の数ではなく先頭の空白でカウント）
-        const depth = (line.match(/^\s+/) || [""])[0].length / 4;
+        // fullPath
+        const fullPath = currentPaths.join("/");
 
-        // スタックを現在の深さに調整
-        pathStack = pathStack.slice(0, depth);
-        pathStack[depth] = name;
+        // ...（大量ファイル表現）は無視
+        if (clean.includes("...")) return;
 
-        const fullPath = pathStack.join("/");
-
-        // ディレクトリか判定
-        if (name.endsWith("/")) {
+        if (clean.endsWith("/")) {
             zip.folder(fullPath);
         } else {
-            zip.file(fullPath, ""); // 空ファイル
+            zip.file(fullPath, "");
         }
     });
 
-    zip.generateAsync({type:"blob"})
-        .then(blob => {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = "generated.zip";
-            a.click();
-        });
+    zip.generateAsync({type:"blob"}).then(blob => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "generated.zip";
+        a.click();
+    });
 }
 </script>
 
