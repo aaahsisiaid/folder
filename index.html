@@ -2,57 +2,644 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>フォルダ内ファイル結合</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tree → zip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-body { font-family: sans-serif; padding: 20px; }
-textarea { width: 100%; height: 400px; margin-top: 10px; }
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #2a2a3a;
+    --accent: #7fffb2;
+    --accent2: #ff7f50;
+    --text: #e8e8f0;
+    --muted: #5a5a7a;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Noto Sans JP', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* grid bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(127,255,178,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(127,255,178,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 820px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  h1 span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* main card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+  }
+
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .dots {
+    display: flex;
+    gap: 6px;
+  }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .dot:nth-child(1) { background: #ff5f57; }
+  .dot:nth-child(2) { background: #ffbd2e; }
+  .dot:nth-child(3) { background: #28c941; }
+
+  .input-area {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 220px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.8;
+    padding: 16px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(127,255,178,0.2);
+  }
+  textarea::placeholder {
+    color: var(--muted);
+    opacity: 0.6;
+  }
+
+  .hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+    line-height: 1.6;
+    padding: 12px 14px;
+    background: rgba(127,255,178,0.03);
+    border: 1px solid rgba(127,255,178,0.1);
+    border-radius: 4px;
+  }
+  .hint strong { color: var(--accent); }
+
+  /* files editor */
+  #files-section {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+  }
+  #files-section.visible {
+    display: flex;
+  }
+
+  .section-bar {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-bar-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .file-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(127,255,178,0.08);
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+
+  .files-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .file-item {
+    border-top: 1px solid var(--border);
+    overflow: hidden;
+    transition: background 0.15s;
+  }
+
+  .file-header {
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .file-header:hover { background: rgba(255,255,255,0.02); }
+
+  .file-icon {
+    font-size: 13px;
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .file-path {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-ext {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--border);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  .toggle-icon {
+    font-size: 10px;
+    color: var(--muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .file-item.open .toggle-icon { transform: rotate(90deg); }
+
+  .file-content-wrap {
+    display: none;
+    padding: 0 20px 16px;
+  }
+  .file-item.open .file-content-wrap { display: block; }
+
+  .file-content {
+    width: 100%;
+    min-height: 120px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    padding: 12px 14px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .file-content:focus {
+    border-color: rgba(127,255,178,0.4);
+  }
+
+  .actions {
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    border: none;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 3px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .btn-parse {
+    background: var(--accent);
+    color: #0a0a0f;
+    font-weight: 700;
+    flex: 1;
+  }
+  .btn-parse:hover {
+    background: #a0ffcc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(127,255,178,0.3);
+  }
+  .btn-parse:active { transform: translateY(0); }
+
+  .btn-download {
+    background: var(--accent2);
+    color: #0a0a0f;
+    font-weight: 700;
+    flex: 1;
+  }
+  .btn-download:hover {
+    background: #ff9f70;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(255,127,80,0.3);
+  }
+  .btn-download:active { transform: translateY(0); }
+
+  .btn-clear {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-clear:hover {
+    border-color: var(--muted);
+    color: var(--text);
+  }
+
+  /* error */
+  .error-msg {
+    display: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #ff6b6b;
+    padding: 10px 14px;
+    background: rgba(255,107,107,0.06);
+    border: 1px solid rgba(255,107,107,0.2);
+    border-radius: 4px;
+    margin: 0 20px 16px;
+  }
+  .error-msg.visible { display: block; }
+
+  /* success flash */
+  .success-flash {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--accent);
+    color: #0a0a0f;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 3px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+    opacity: 0;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .success-flash.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 </style>
 </head>
 <body>
 
-<h2>文字系ファイルをフォルダごとアップロードして結合</h2>
-<input type="file" id="folderInput" webkitdirectory multiple>
-<button id="processBtn">結合して表示</button>
+<div class="container">
+  <header>
+    <div class="badge">utility tool</div>
+    <h1>tree <span>→</span> zip</h1>
+    <p class="subtitle">ファイルツリーを入力して、各ファイルに内容を記述し、ZIPとしてダウンロード</p>
+  </header>
 
-<textarea id="output" placeholder="ここに結合結果が表示されます"></textarea>
+  <div class="card">
+    <div class="card-header">
+      <div class="dots">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+      <span class="card-title">file tree input</span>
+    </div>
+
+    <div class="input-area">
+      <textarea id="tree-input" placeholder="my-project
+ ├ server.js
+ ├ package.json
+ └ public
+     └ index.html"></textarea>
+
+      <div class="hint">
+        <strong>├</strong> <strong>└</strong> <strong>│</strong> などのツリー文字か、インデント（スペース/タブ）でネスト構造を表現。<br>
+        最初の行はルートディレクトリ名として扱われます。
+      </div>
+
+      <div class="actions" style="padding: 0; border: none;">
+        <button class="btn-parse" onclick="parseTree()">▶ パース &amp; 編集</button>
+        <button class="btn-clear" onclick="clearAll()">クリア</button>
+      </div>
+    </div>
+
+    <div id="error-msg" class="error-msg"></div>
+
+    <div id="files-section">
+      <div class="section-bar">
+        <span class="section-bar-title">ファイル内容を編集</span>
+        <span class="file-count" id="file-count">0 files</span>
+      </div>
+      <div class="files-list" id="files-list"></div>
+      <div class="actions">
+        <button class="btn-download" onclick="downloadZip()">⬇ ZIP ダウンロード</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="success-flash" id="success-flash">✓ ZIP を生成しました</div>
 
 <script>
-const folderInput = document.getElementById('folderInput');
-const processBtn = document.getElementById('processBtn');
-const output = document.getElementById('output');
+const FILE_ICONS = {
+  js: '󰌞', ts: '', jsx: '', tsx: '',
+  html: '', css: '', scss: '',
+  json: '', md: '󰍔', txt: '󰈙',
+  py: '', rs: '', go: '',
+  sh: '󰞷', env: '󰙪', gitignore: '󰊢',
+  default: '󰈚'
+};
 
-const allowedExtensions = ['htm','html','java','yml','txt','css','js']; // 必要に応じて追加
+// Fallback to emoji icons
+const FILE_EMOJIS = {
+  js: '📜', ts: '📘', jsx: '⚛️', tsx: '⚛️',
+  html: '🌐', css: '🎨', scss: '🎨',
+  json: '📋', md: '📝', txt: '📄',
+  py: '🐍', rs: '🦀', go: '🐹',
+  sh: '💻', env: '🔒', default: '📄'
+};
 
-processBtn.addEventListener('click', () => {
-    const files = Array.from(folderInput.files);
-    const filteredFiles = files.filter(f => {
-        const ext = f.name.split('.').pop().toLowerCase();
-        return allowedExtensions.includes(ext);
-    });
+function getExt(name) {
+  const parts = name.split('.');
+  return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
+}
 
-    if(filteredFiles.length === 0){
-        alert('対象ファイルがありません');
-        return;
+function getIcon(name) {
+  const ext = getExt(name);
+  return FILE_EMOJIS[ext] || FILE_EMOJIS.default;
+}
+
+function parseTree() {
+  const raw = document.getElementById('tree-input').value.trim();
+  showError('');
+
+  if (!raw) {
+    showError('ツリーテキストを入力してください。');
+    return;
+  }
+
+  const files = extractFiles(raw);
+  if (!files || files.length === 0) {
+    showError('ファイルが検出できませんでした。書式を確認してください。');
+    return;
+  }
+
+  renderFiles(files);
+}
+
+function extractFiles(text) {
+  const lines = text.split('\n');
+  const files = [];
+  const pathStack = [];
+
+  // First line is root dir name
+  const rootName = lines[0].replace(/[│├└─\s]/g, '').trim();
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+
+    // Remove tree chars: │ ├ └ ─ and their variants
+    const cleanLine = line.replace(/[│├└─┤┐┘┼╔╗╚╝╠╣╦╩╬]/g, ' ');
+
+    // Calculate depth by leading spaces
+    const depth = Math.floor((cleanLine.length - cleanLine.trimStart().length) / 2) + 1;
+
+    const name = cleanLine.trim();
+    if (!name) continue;
+
+    // Adjust stack to current depth
+    pathStack.length = depth - 1;
+    pathStack[depth - 1] = name;
+
+    // If no extension, treat as directory (skip), otherwise it's a file
+    if (!name.includes('.') && !name.includes('rc') && !looksLikeFile(name)) {
+      // directory — just keep in stack
+    } else {
+      // It's a file
+      const fullPath = [rootName, ...pathStack.slice(0, depth)].join('/');
+      files.push({ path: fullPath, content: '' });
     }
+  }
 
-    let results = [];
+  return files;
+}
 
-    let readCount = 0;
-    filteredFiles.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            results.push(`--- ${file.webkitRelativePath} ---\n${e.target.result}\n\n`);
-            readCount++;
-            if(readCount === filteredFiles.length){
-                // パス順に並べる
-                results.sort();
-                output.value = results.join('');
-            }
-        };
-        reader.readAsText(file, 'UTF-8');
-    });
-});
+function looksLikeFile(name) {
+  // heuristic: has extension, or known filenames
+  const known = ['makefile', 'dockerfile', 'procfile', 'readme', 'license', 'gitignore', 'gitattributes', '.env', '.babelrc', '.eslintrc'];
+  return known.includes(name.toLowerCase()) || name.startsWith('.');
+}
+
+function renderFiles(files) {
+  const list = document.getElementById('files-list');
+  const section = document.getElementById('files-section');
+  const countEl = document.getElementById('file-count');
+
+  list.innerHTML = '';
+  countEl.textContent = `${files.length} file${files.length !== 1 ? 's' : ''}`;
+
+  files.forEach((f, i) => {
+    const name = f.path.split('/').pop();
+    const ext = getExt(name);
+    const icon = getIcon(name);
+
+    const item = document.createElement('div');
+    item.className = 'file-item' + (i === 0 ? ' open' : '');
+    item.innerHTML = `
+      <div class="file-header" onclick="toggleFile(this.parentElement)">
+        <span class="file-icon">${icon}</span>
+        <span class="file-path">${f.path}</span>
+        ${ext ? `<span class="file-ext">.${ext}</span>` : ''}
+        <span class="toggle-icon">▶</span>
+      </div>
+      <div class="file-content-wrap">
+        <textarea class="file-content" placeholder="// ${name} の内容をここに入力...
+// 空のままでも構いません" data-path="${f.path}"></textarea>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+
+  section.classList.add('visible');
+}
+
+function toggleFile(item) {
+  item.classList.toggle('open');
+}
+
+async function downloadZip() {
+  const textareas = document.querySelectorAll('.file-content');
+  if (textareas.length === 0) {
+    showError('まずツリーをパースしてください。');
+    return;
+  }
+
+  const zip = new JSZip();
+
+  textareas.forEach(ta => {
+    const path = ta.dataset.path;
+    const content = ta.value;
+    zip.file(path, content);
+  });
+
+  // Determine zip name from root
+  const firstPath = textareas[0].dataset.path;
+  const rootName = firstPath.split('/')[0] || 'project';
+
+  try {
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${rootName}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showSuccess();
+  } catch (e) {
+    showError('ZIPの生成に失敗しました: ' + e.message);
+  }
+}
+
+function clearAll() {
+  document.getElementById('tree-input').value = '';
+  document.getElementById('files-section').classList.remove('visible');
+  document.getElementById('files-list').innerHTML = '';
+  showError('');
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  if (msg) {
+    el.textContent = msg;
+    el.classList.add('visible');
+  } else {
+    el.classList.remove('visible');
+  }
+}
+
+function showSuccess() {
+  const el = document.getElementById('success-flash');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
 </script>
-
 </body>
 </html>
