@@ -20,9 +20,10 @@
     --muted: #5a5a7a;
     --mono: 'Space Mono', monospace;
     --sans: 'Noto Sans JP', sans-serif;
+    --sidebar-w: 220px;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; }
 
   body {
     background: var(--bg);
@@ -32,536 +33,821 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 48px 24px 80px;
+    padding: 36px 40px 60px;
     position: relative;
     overflow-x: hidden;
   }
 
   body::before {
-    content: '';
-    position: fixed; inset: 0;
+    content:'';
+    position:fixed; inset:0;
     background-image:
-      linear-gradient(rgba(127,255,178,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(127,255,178,0.025) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none; z-index: 0;
-    animation: gridDrift 24s linear infinite;
+      linear-gradient(rgba(127,255,178,0.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(127,255,178,0.022) 1px, transparent 1px);
+    background-size:40px 40px;
+    pointer-events:none; z-index:0;
+    animation:gridDrift 24s linear infinite;
   }
   @keyframes gridDrift {
-    from { background-position: 0 0; }
-    to   { background-position: 40px 40px; }
+    from{background-position:0 0} to{background-position:40px 40px}
   }
 
   body::after {
-    content: '';
-    position: fixed; top: -200px; left: 50%;
-    transform: translateX(-50%);
-    width: 700px; height: 500px;
-    background: radial-gradient(ellipse, rgba(127,255,178,0.05) 0%, transparent 70%);
-    pointer-events: none; z-index: 0;
-    animation: glowPulse 7s ease-in-out infinite;
+    content:'';
+    position:fixed; top:-200px; left:50%;
+    transform:translateX(-50%);
+    width:900px; height:600px;
+    background:radial-gradient(ellipse, rgba(127,255,178,0.045) 0%, transparent 70%);
+    pointer-events:none; z-index:0;
+    animation:glowPulse 7s ease-in-out infinite;
   }
   @keyframes glowPulse {
-    0%,100% { opacity:0.5; transform:translateX(-50%) scale(1); }
-    50%      { opacity:1;   transform:translateX(-50%) scale(1.12); }
+    0%,100%{opacity:.5;transform:translateX(-50%) scale(1)}
+    50%{opacity:1;transform:translateX(-50%) scale(1.12)}
   }
 
   @keyframes fadeUp {
-    from { opacity:0; transform:translateY(18px); }
-    to   { opacity:1; transform:translateY(0); }
+    from{opacity:0;transform:translateY(16px)}
+    to{opacity:1;transform:translateY(0)}
   }
 
-  .container {
-    position: relative; z-index: 1;
-    width: 100%; max-width: 840px;
-    display: flex; flex-direction: column; gap: 28px;
-    animation: fadeUp 0.55s cubic-bezier(0.22,1,0.36,1) both;
+  /* ── outer layout ── */
+  .page {
+    position:relative; z-index:1;
+    width:100%; max-width:1400px;
+    display:flex; flex-direction:column; gap:24px;
+    animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;
   }
 
   header {
-    display: flex; flex-direction: column; gap: 8px;
-    animation: fadeUp 0.55s 0.06s cubic-bezier(0.22,1,0.36,1) both;
+    display:flex; flex-direction:column; gap:6px;
+    animation:fadeUp .55s .06s cubic-bezier(.22,1,.36,1) both;
   }
 
   .badge {
-    font-family: var(--mono); font-size: 10px;
-    letter-spacing: 0.2em; color: var(--accent);
-    text-transform: uppercase;
-    display: flex; align-items: center; gap: 8px;
+    font-family:var(--mono); font-size:10px;
+    letter-spacing:.2em; color:var(--accent);
+    text-transform:uppercase;
+    display:flex; align-items:center; gap:8px;
   }
   .badge::before {
-    content: ''; width: 24px; height: 1px; background: var(--accent);
-    animation: expandLine 0.9s 0.3s ease both;
+    content:''; width:24px; height:1px; background:var(--accent);
+    animation:expandLine .9s .3s ease both;
   }
-  @keyframes expandLine {
-    from { width:0; opacity:0; } to { width:24px; opacity:1; }
-  }
+  @keyframes expandLine { from{width:0;opacity:0} to{width:24px;opacity:1} }
 
   h1 {
-    font-family: var(--mono);
-    font-size: clamp(28px, 5vw, 48px);
-    font-weight: 700; line-height: 1.1; letter-spacing: -0.02em;
+    font-family:var(--mono);
+    font-size:clamp(24px,3.5vw,44px);
+    font-weight:700; line-height:1.1; letter-spacing:-.02em;
   }
-  h1 span { color: var(--accent); }
+  h1 span { color:var(--accent); }
+  .subtitle { font-size:13px; color:var(--muted); font-weight:300; line-height:1.6; }
 
-  .subtitle { font-size: 13px; color: var(--muted); font-weight: 300; line-height: 1.6; }
+  /* ── Mac desktop bar (fake menu bar on top of window) ── */
+  .fake-menubar {
+    display:flex; align-items:center; gap:0;
+    font-family:var(--mono); font-size:11px;
+    color:var(--muted); letter-spacing:.04em;
+    padding:0 16px;
+    background: rgba(255,255,255,0.018);
+    border:1px solid var(--border);
+    border-radius:8px 8px 0 0;
+    border-bottom:none;
+    height:28px;
+    animation:fadeUp .55s .09s cubic-bezier(.22,1,.36,1) both;
+    position:relative;
+    z-index:2;
+  }
+  .fmb-apple {
+    margin-right:18px; font-size:14px; opacity:.6;
+    cursor:default; transition:opacity .15s;
+  }
+  .fmb-apple:hover{opacity:1;}
+  .fmb-item {
+    padding:0 10px; height:100%;
+    display:flex; align-items:center;
+    cursor:default; border-radius:4px;
+    transition:background .15s;
+    white-space:nowrap;
+  }
+  .fmb-item:hover { background:rgba(255,255,255,0.07); }
+  .fmb-item.bold { font-weight:700; color:var(--text); }
+  .fmb-right {
+    margin-left:auto;
+    display:flex; align-items:center; gap:4px;
+  }
+  .fmb-icon {
+    padding:0 7px; height:100%;
+    display:flex; align-items:center;
+    cursor:pointer; border-radius:4px;
+    font-size:12px;
+    transition:background .15s;
+  }
+  .fmb-icon:hover { background:rgba(255,255,255,0.07); }
+
+  /* clock */
+  #fmb-clock {
+    font-family:var(--mono); font-size:10px;
+    color:var(--text); padding:0 8px;
+    letter-spacing:.04em;
+  }
 
   /* ── Mac Window ── */
   .mac-window {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:0 0 12px 12px;
+    overflow:hidden;
     box-shadow:
       0 0 0 1px rgba(255,255,255,0.04) inset,
-      0 28px 80px rgba(0,0,0,0.65),
-      0 2px 4px rgba(0,0,0,0.4);
-    animation: fadeUp 0.55s 0.12s cubic-bezier(0.22,1,0.36,1) both;
-    transition: box-shadow 0.4s;
-    position: relative;
+      0 28px 80px rgba(0,0,0,.65),
+      0 2px 4px rgba(0,0,0,.4);
+    animation:fadeUp .55s .12s cubic-bezier(.22,1,.36,1) both;
+    transition:box-shadow .4s;
+    position:relative;
+    display:flex; flex-direction:column;
   }
   .mac-window:hover {
     box-shadow:
       0 0 0 1px rgba(255,255,255,0.05) inset,
-      0 36px 100px rgba(0,0,0,0.75),
-      0 2px 4px rgba(0,0,0,0.4);
+      0 36px 100px rgba(0,0,0,.75),
+      0 2px 4px rgba(0,0,0,.4);
   }
   .mac-window::before {
-    content: '';
-    position: absolute; top:0; left:0; right:0; height:1px; z-index:3;
-    background: linear-gradient(90deg,
-      transparent 0%, rgba(127,255,178,0.25) 25%,
-      rgba(127,255,178,0.55) 50%, rgba(127,255,178,0.25) 75%, transparent 100%);
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:1px; z-index:3;
+    background:linear-gradient(90deg,
+      transparent 0%, rgba(127,255,178,.2) 25%,
+      rgba(127,255,178,.5) 50%, rgba(127,255,178,.2) 75%, transparent 100%);
   }
 
   /* titlebar */
   .titlebar {
-    height: 44px; padding: 0 16px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-    border-bottom: 1px solid var(--border2);
-    display: flex; align-items: center;
-    position: relative; user-select: none;
+    height:44px; padding:0 16px;
+    background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+    border-bottom:1px solid var(--border2);
+    display:flex; align-items:center;
+    position:relative; user-select:none; flex-shrink:0;
   }
-
-  .traffic-lights { display: flex; gap: 8px; align-items: center; }
+  .traffic-lights { display:flex; gap:8px; align-items:center; }
   .tl {
-    width: 12px; height: 12px; border-radius: 50%;
-    position: relative; cursor: default;
-    transition: filter 0.15s, transform 0.15s;
+    width:12px; height:12px; border-radius:50%;
+    position:relative; cursor:default;
+    transition:filter .15s, transform .15s;
   }
-  .tl:hover { filter: brightness(1.25); transform: scale(1.1); }
+  .tl:hover{filter:brightness(1.25);transform:scale(1.1);}
   .tl::after {
-    content: ''; position: absolute; inset: 2px;
-    border-radius: 50%; background: rgba(255,255,255,0.25);
+    content:''; position:absolute; inset:2px;
+    border-radius:50%; background:rgba(255,255,255,.25);
   }
-  .tl-red    { background: radial-gradient(circle at 35% 35%, #ff7f73, #ff5f57); box-shadow: 0 0 5px rgba(255,95,87,0.45); }
-  .tl-yellow { background: radial-gradient(circle at 35% 35%, #ffd870, #ffbd2e); box-shadow: 0 0 5px rgba(255,189,46,0.45); }
-  .tl-green  { background: radial-gradient(circle at 35% 35%, #6df97e, #28c941); box-shadow: 0 0 5px rgba(40,201,65,0.45); }
-
+  .tl-red    {background:radial-gradient(circle at 35% 35%,#ff7f73,#ff5f57);box-shadow:0 0 5px rgba(255,95,87,.45);}
+  .tl-yellow {background:radial-gradient(circle at 35% 35%,#ffd870,#ffbd2e);box-shadow:0 0 5px rgba(255,189,46,.45);}
+  .tl-green  {background:radial-gradient(circle at 35% 35%,#6df97e,#28c941);box-shadow:0 0 5px rgba(40,201,65,.45);}
   .titlebar-title {
-    position: absolute; left: 50%; transform: translateX(-50%);
-    font-family: var(--mono); font-size: 11px;
-    letter-spacing: 0.06em; color: var(--muted);
-    pointer-events: none;
+    position:absolute; left:50%; transform:translateX(-50%);
+    font-family:var(--mono); font-size:11px;
+    letter-spacing:.06em; color:var(--muted); pointer-events:none;
   }
+  .titlebar-btns {
+    margin-left:auto; display:flex; gap:6px; align-items:center;
+  }
+  .titlebar-btn {
+    font-family:var(--mono); font-size:10px;
+    color:var(--muted); background:rgba(255,255,255,.04);
+    border:1px solid var(--border); border-radius:4px;
+    padding:2px 8px; cursor:pointer; letter-spacing:.06em;
+    transition:all .15s;
+  }
+  .titlebar-btn:hover{background:rgba(255,255,255,.08);color:var(--text);}
+
+  /* ── window body: sidebar + main ── */
+  .window-body {
+    display:flex; flex:1; overflow:hidden;
+  }
+
+  /* sidebar */
+  .sidebar {
+    width:var(--sidebar-w); flex-shrink:0;
+    border-right:1px solid var(--border2);
+    background:rgba(0,0,0,.18);
+    display:flex; flex-direction:column;
+    overflow:hidden;
+  }
+  .sidebar-section {
+    padding:10px 0;
+    border-bottom:1px solid var(--border2);
+  }
+  .sidebar-section:last-child { border-bottom:none; flex:1; }
+  .sidebar-label {
+    font-family:var(--mono); font-size:9px;
+    letter-spacing:.18em; color:var(--muted);
+    text-transform:uppercase; padding:0 14px 6px;
+    opacity:.6;
+  }
+  .sidebar-item {
+    display:flex; align-items:center; gap:8px;
+    padding:6px 14px; cursor:default;
+    font-family:var(--mono); font-size:11px; color:var(--muted);
+    border-radius:0; transition:background .15s, color .15s;
+    user-select:none;
+  }
+  .sidebar-item:hover{background:rgba(255,255,255,.03);color:var(--text);}
+  .sidebar-item.active{
+    background:rgba(127,255,178,.07);
+    color:var(--accent);
+  }
+  .sidebar-item .si-icon{font-size:13px;width:18px;text-align:center;flex-shrink:0;}
+  .sidebar-item .si-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sidebar-item .si-badge{
+    font-size:9px; background:rgba(127,255,178,.12);
+    color:var(--accent); border:1px solid rgba(127,255,178,.2);
+    padding:0 5px; border-radius:3px;
+  }
+
+  /* sidebar activity */
+  .sidebar-mini-graph {
+    padding:10px 14px 12px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .smg-label {
+    font-family:var(--mono); font-size:9px; color:var(--muted); opacity:.5;
+    letter-spacing:.1em; text-transform:uppercase;
+  }
+  .smg-bars {
+    display:flex; align-items:flex-end; gap:3px; height:28px;
+  }
+  .smg-bar {
+    flex:1; background:rgba(127,255,178,.15); border-radius:2px 2px 0 0;
+    transition:height .6s cubic-bezier(.22,1,.36,1), background .2s;
+    min-height:2px;
+    animation:barGrow .8s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes barGrow {
+    from{transform:scaleY(0);transform-origin:bottom}
+    to{transform:scaleY(1);transform-origin:bottom}
+  }
+  .smg-bar:hover{background:rgba(127,255,178,.35);}
 
   /* tabbar */
   .tabbar {
-    display: flex; align-items: flex-end;
-    padding: 0 16px; gap: 2px;
-    background: rgba(0,0,0,0.25);
-    border-bottom: 1px solid var(--border2);
-    height: 38px;
+    display:flex; align-items:flex-end;
+    padding:0 16px; gap:2px;
+    background:rgba(0,0,0,.2);
+    border-bottom:1px solid var(--border2);
+    height:38px; flex-shrink:0;
   }
   .tab {
-    padding: 0 16px; height: 30px;
-    display: flex; align-items: center; gap: 7px;
-    font-family: var(--mono); font-size: 11px;
-    color: var(--muted); letter-spacing: 0.04em;
-    border-radius: 7px 7px 0 0;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 1px solid transparent; border-bottom: none;
-    position: relative;
+    padding:0 16px; height:30px;
+    display:flex; align-items:center; gap:7px;
+    font-family:var(--mono); font-size:11px;
+    color:var(--muted); letter-spacing:.04em;
+    border-radius:7px 7px 0 0;
+    cursor:pointer; transition:all .2s;
+    border:1px solid transparent; border-bottom:none; position:relative;
   }
-  .tab:hover { color: var(--text); background: rgba(255,255,255,0.03); }
-  .tab.active {
-    color: var(--text); background: var(--surface);
-    border-color: var(--border2); margin-bottom: -1px; z-index: 1;
+  .tab:hover{color:var(--text);background:rgba(255,255,255,.03);}
+  .tab.active{
+    color:var(--text); background:var(--surface);
+    border-color:var(--border2); margin-bottom:-1px; z-index:1;
   }
   .tab-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--border); flex-shrink: 0;
-    transition: background 0.25s, box-shadow 0.25s;
+    width:6px; height:6px; border-radius:50%;
+    background:var(--border); flex-shrink:0;
+    transition:background .25s, box-shadow .25s;
   }
-  .tab.active .tab-dot {
-    background: var(--accent);
-    box-shadow: 0 0 6px rgba(127,255,178,0.7);
-  }
+  .tab.active .tab-dot{background:var(--accent);box-shadow:0 0 6px rgba(127,255,178,.7);}
   .tab-badge {
-    display: none; font-size: 9px;
-    background: rgba(127,255,178,0.15);
-    color: var(--accent); border: 1px solid rgba(127,255,178,0.2);
-    padding: 0 5px; border-radius: 3px;
+    display:none; font-size:9px;
+    background:rgba(127,255,178,.15); color:var(--accent);
+    border:1px solid rgba(127,255,178,.2); padding:0 5px; border-radius:3px;
+  }
+
+  /* main content area */
+  .main-area {
+    flex:1; min-width:0;
+    display:flex; flex-direction:column;
   }
 
   /* panels */
-  .panel { display: none; }
-  .panel.active { display: block; }
+  .panel{display:none;}
+  .panel.active{display:flex; flex-direction:column;}
 
   /* input panel */
   .input-area {
-    padding: 20px;
-    display: flex; flex-direction: column; gap: 14px;
+    padding:20px; display:flex; flex-direction:column; gap:14px; flex:1;
   }
-
   .editor-wrap {
-    position: relative; border-radius: 8px; overflow: hidden;
-    border: 1px solid var(--border);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    position:relative; border-radius:8px; overflow:hidden;
+    border:1px solid var(--border);
+    transition:border-color .2s, box-shadow .2s; flex:1;
   }
   .editor-wrap:focus-within {
-    border-color: rgba(127,255,178,0.3);
-    box-shadow: 0 0 0 3px rgba(127,255,178,0.07);
+    border-color:rgba(127,255,178,.3);
+    box-shadow:0 0 0 3px rgba(127,255,178,.07);
   }
-
   .line-numbers {
-    position: absolute; left:0; top:0; bottom:0; width:40px;
-    background: rgba(0,0,0,0.25);
-    border-right: 1px solid var(--border2);
-    padding: 14px 0; overflow: hidden;
-    display: flex; flex-direction: column; align-items: flex-end;
-    padding-right: 8px; pointer-events: none;
+    position:absolute; left:0; top:0; bottom:0; width:40px;
+    background:rgba(0,0,0,.25);
+    border-right:1px solid var(--border2);
+    padding:14px 0; overflow:hidden;
+    display:flex; flex-direction:column; align-items:flex-end;
+    padding-right:8px; pointer-events:none;
   }
   .line-numbers span {
-    font-family: var(--mono); font-size: 11px;
-    color: var(--muted); opacity: 0.35;
-    line-height: 1.8; height: 23.4px; display: block;
+    font-family:var(--mono); font-size:11px;
+    color:var(--muted); opacity:.35;
+    line-height:1.8; height:23.4px; display:block;
   }
-
   textarea {
-    width: 100%; min-height: 200px;
-    background: var(--bg); border: none;
-    color: var(--text); font-family: var(--mono);
-    font-size: 13px; line-height: 1.8;
-    padding: 14px 14px 14px 52px;
-    resize: vertical; outline: none; display: block;
+    width:100%; min-height:220px;
+    background:var(--bg); border:none;
+    color:var(--text); font-family:var(--mono);
+    font-size:13px; line-height:1.8;
+    padding:14px 14px 14px 52px;
+    resize:vertical; outline:none; display:block;
   }
-  textarea::placeholder { color: var(--muted); opacity: 0.45; }
+  textarea::placeholder{color:var(--muted);opacity:.45;}
 
   .hint {
-    font-size: 11px; color: var(--muted);
-    font-family: var(--mono); line-height: 1.7;
-    padding: 10px 14px;
-    background: rgba(127,255,178,0.03);
-    border: 1px solid rgba(127,255,178,0.07);
-    border-radius: 6px;
-    display: flex; gap: 8px; align-items: flex-start;
+    font-size:11px; color:var(--muted); font-family:var(--mono); line-height:1.7;
+    padding:10px 14px;
+    background:rgba(127,255,178,.03); border:1px solid rgba(127,255,178,.07);
+    border-radius:6px; display:flex; gap:8px; align-items:flex-start;
   }
-  .hint::before { content: 'ℹ'; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
-  .hint strong { color: var(--accent); }
+  .hint::before{content:'ℹ';color:var(--accent);flex-shrink:0;margin-top:1px;}
+  .hint strong{color:var(--accent);}
 
   /* toolbar */
   .toolbar {
-    padding: 12px 20px; border-top: 1px solid var(--border2);
-    display: flex; gap: 8px; align-items: center;
-    background: rgba(0,0,0,0.18);
+    padding:12px 20px; border-top:1px solid var(--border2);
+    display:flex; gap:8px; align-items:center;
+    background:rgba(0,0,0,.18); flex-shrink:0;
   }
-  .spacer { flex: 1; }
+  .spacer{flex:1;}
 
   /* buttons */
   button {
-    font-family: var(--mono); font-size: 11px;
-    letter-spacing: 0.08em; border: none;
-    cursor: pointer; padding: 8px 18px;
-    border-radius: 6px;
-    transition: all 0.18s cubic-bezier(0.22,1,0.36,1);
-    text-transform: uppercase; position: relative; overflow: hidden;
+    font-family:var(--mono); font-size:11px;
+    letter-spacing:.08em; border:none;
+    cursor:pointer; padding:8px 18px;
+    border-radius:6px;
+    transition:all .18s cubic-bezier(.22,1,.36,1);
+    text-transform:uppercase; position:relative; overflow:hidden;
   }
   button::after {
-    content: ''; position: absolute; inset: 0;
-    background: rgba(255,255,255,0); transition: background 0.15s;
+    content:''; position:absolute; inset:0;
+    background:rgba(255,255,255,0); transition:background .15s;
   }
-  button:hover::after { background: rgba(255,255,255,0.07); }
-  button:active { transform: scale(0.96) !important; }
-
-  .btn-parse {
-    background: var(--accent); color: #0a0a0f; font-weight: 700;
-    box-shadow: 0 2px 12px rgba(127,255,178,0.25);
+  button:hover::after{background:rgba(255,255,255,.07);}
+  button:active{transform:scale(.96) !important;}
+  .btn-parse{
+    background:var(--accent); color:#0a0a0f; font-weight:700;
+    box-shadow:0 2px 12px rgba(127,255,178,.25);
   }
-  .btn-parse:hover {
-    box-shadow: 0 4px 24px rgba(127,255,178,0.45);
-    transform: translateY(-1px);
+  .btn-parse:hover{box-shadow:0 4px 24px rgba(127,255,178,.45);transform:translateY(-1px);}
+  .btn-download{
+    background:var(--accent2); color:#0a0a0f; font-weight:700;
+    box-shadow:0 2px 12px rgba(255,127,80,.25);
   }
-
-  .btn-download {
-    background: var(--accent2); color: #0a0a0f; font-weight: 700;
-    box-shadow: 0 2px 12px rgba(255,127,80,0.25);
+  .btn-download:hover{box-shadow:0 4px 24px rgba(255,127,80,.45);transform:translateY(-1px);}
+  .btn-ghost{
+    background:transparent; border:1px solid var(--border); color:var(--muted);
   }
-  .btn-download:hover {
-    box-shadow: 0 4px 24px rgba(255,127,80,0.45);
-    transform: translateY(-1px);
-  }
-
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border); color: var(--muted);
-  }
-  .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+  .btn-ghost:hover{border-color:var(--muted);color:var(--text);}
 
   /* error */
   .error-msg {
-    display: none; font-family: var(--mono); font-size: 11px;
-    color: #ff6b6b; padding: 8px 14px;
-    background: rgba(255,107,107,0.06);
-    border: 1px solid rgba(255,107,107,0.15);
-    border-radius: 6px; margin: 0 20px 12px;
-    animation: shakeX 0.3s ease;
-    gap: 8px; align-items: center;
+    display:none; font-family:var(--mono); font-size:11px;
+    color:#ff6b6b; padding:8px 14px;
+    background:rgba(255,107,107,.06); border:1px solid rgba(255,107,107,.15);
+    border-radius:6px; margin:0 20px 12px;
+    animation:shakeX .3s ease; gap:8px; align-items:center;
   }
-  .error-msg.visible { display: flex; }
-  .error-msg::before { content: '✕'; flex-shrink: 0; }
+  .error-msg.visible{display:flex;}
+  .error-msg::before{content:'✕';flex-shrink:0;}
   @keyframes shakeX {
-    0%,100%{ transform:translateX(0); }
-    25%    { transform:translateX(-4px); }
-    75%    { transform:translateX(4px); }
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)}
   }
 
-  /* files panel header */
+  /* files panel */
   .files-panel-header {
-    padding: 12px 20px; border-bottom: 1px solid var(--border2);
-    display: flex; align-items: center; justify-content: space-between;
-    background: rgba(0,0,0,0.12);
+    padding:12px 20px; border-bottom:1px solid var(--border2);
+    display:flex; align-items:center; justify-content:space-between;
+    background:rgba(0,0,0,.12); flex-shrink:0;
   }
   .files-panel-title {
-    font-family: var(--mono); font-size: 10px;
-    letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase;
+    font-family:var(--mono); font-size:10px;
+    letter-spacing:.15em; color:var(--muted); text-transform:uppercase;
   }
   .pill {
-    font-family: var(--mono); font-size: 10px;
-    color: var(--accent); background: rgba(127,255,178,0.1);
-    border: 1px solid rgba(127,255,178,0.2);
-    padding: 2px 10px; border-radius: 999px;
+    font-family:var(--mono); font-size:10px;
+    color:var(--accent); background:rgba(127,255,178,.1);
+    border:1px solid rgba(127,255,178,.2); padding:2px 10px; border-radius:999px;
   }
+  .files-list{display:flex;flex-direction:column; overflow-y:auto; flex:1;}
 
-  .files-list { display: flex; flex-direction: column; }
-
-  /* file item */
+  /* file items */
   @keyframes slideInFile {
-    from { opacity:0; transform:translateX(-8px); }
-    to   { opacity:1; transform:translateX(0); }
+    from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)}
   }
-
   .file-item {
-    border-top: 1px solid var(--border2);
-    animation: slideInFile 0.28s cubic-bezier(0.22,1,0.36,1) both;
+    border-top:1px solid var(--border2);
+    animation:slideInFile .28s cubic-bezier(.22,1,.36,1) both;
   }
-  .file-item:first-child { border-top: none; }
-
+  .file-item:first-child{border-top:none;}
   .file-header {
-    padding: 10px 20px;
-    display: flex; align-items: center; gap: 10px;
-    cursor: pointer; user-select: none;
-    transition: background 0.15s;
+    padding:10px 20px; display:flex; align-items:center; gap:10px;
+    cursor:pointer; user-select:none; transition:background .15s;
   }
-  .file-header:hover { background: rgba(255,255,255,0.025); }
-
-  .file-icon { font-size: 15px; width: 22px; text-align: center; flex-shrink: 0; }
-
-  .file-path-wrap { flex: 1; min-width: 0; }
-  .file-name { font-family: var(--mono); font-size: 12px; color: var(--text); }
-  .file-dir  { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 1px; }
-
-  .file-ext {
-    font-family: var(--mono); font-size: 10px;
-    color: var(--muted); background: var(--border);
-    padding: 1px 7px; border-radius: 3px; flex-shrink: 0;
+  .file-header:hover{background:rgba(255,255,255,.025);}
+  .file-icon{font-size:15px;width:22px;text-align:center;flex-shrink:0;}
+  .file-path-wrap{flex:1;min-width:0;}
+  .file-name{font-family:var(--mono);font-size:12px;color:var(--text);}
+  .file-dir{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px;}
+  .file-ext{
+    font-family:var(--mono);font-size:10px;color:var(--muted);
+    background:var(--border);padding:1px 7px;border-radius:3px;flex-shrink:0;
   }
-
   .chevron {
-    width: 16px; height: 16px; flex-shrink: 0; color: var(--muted);
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    width:16px;height:16px;flex-shrink:0;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .28s cubic-bezier(.34,1.56,.64,1);
   }
-  .chevron svg { width: 10px; height: 10px; }
-  .file-item.open .chevron { transform: rotate(90deg); }
-
-  /* smooth open/close with grid trick */
-  .file-content-wrap {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.3s cubic-bezier(0.22,1,0.36,1);
+  .chevron svg{width:10px;height:10px;}
+  .file-item.open .chevron{transform:rotate(90deg);}
+  .file-content-wrap{
+    display:grid; grid-template-rows:0fr;
+    transition:grid-template-rows .3s cubic-bezier(.22,1,.36,1);
   }
-  .file-item.open .file-content-wrap { grid-template-rows: 1fr; }
-
-  .file-content-inner { overflow: hidden; }
-  .file-content-inner-pad {
-    padding: 0 20px;
-    transition: padding 0.3s cubic-bezier(0.22,1,0.36,1);
-  }
-  .file-item.open .file-content-inner-pad { padding: 4px 20px 16px; }
-
+  .file-item.open .file-content-wrap{grid-template-rows:1fr;}
+  .file-content-inner{overflow:hidden;}
+  .file-content-inner-pad{padding:0 20px;transition:padding .3s cubic-bezier(.22,1,.36,1);}
+  .file-item.open .file-content-inner-pad{padding:4px 20px 16px;}
   .file-content {
-    width: 100%; min-height: 100px;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border2);
-    border-radius: 6px; color: var(--text);
-    font-family: var(--mono); font-size: 12px; line-height: 1.7;
-    padding: 12px 14px; resize: vertical; outline: none; display: block;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    width:100%; min-height:100px;
+    background:rgba(0,0,0,.3); border:1px solid var(--border2);
+    border-radius:6px; color:var(--text);
+    font-family:var(--mono); font-size:12px; line-height:1.7;
+    padding:12px 14px; resize:vertical; outline:none; display:block;
+    transition:border-color .2s, box-shadow .2s;
   }
-  .file-content:focus {
-    border-color: rgba(127,255,178,0.28);
-    box-shadow: 0 0 0 3px rgba(127,255,178,0.06);
+  .file-content:focus{
+    border-color:rgba(127,255,178,.28);
+    box-shadow:0 0 0 3px rgba(127,255,178,.06);
   }
 
   /* empty state */
-  .empty-state {
-    padding: 56px 20px;
-    display: flex; flex-direction: column;
-    align-items: center; gap: 14px;
+  .empty-state{
+    padding:56px 20px; display:flex; flex-direction:column;
+    align-items:center; gap:14px;
   }
-  .empty-icon {
-    font-size: 36px; opacity: 0.25;
-    animation: floatIcon 4s ease-in-out infinite;
+  .empty-icon{
+    font-size:36px;opacity:.25;
+    animation:floatIcon 4s ease-in-out infinite;
   }
-  @keyframes floatIcon {
-    0%,100%{ transform:translateY(0); }
-    50%    { transform:translateY(-7px); }
-  }
-  .empty-text {
-    font-family: var(--mono); font-size: 12px;
-    color: var(--muted); opacity: 0.5;
-    text-align: center; line-height: 1.7;
+  @keyframes floatIcon{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  .empty-text{
+    font-family:var(--mono);font-size:12px;
+    color:var(--muted);opacity:.5;text-align:center;line-height:1.7;
   }
 
   /* statusbar */
   .statusbar {
-    height: 24px; padding: 0 16px;
-    border-top: 1px solid var(--border2);
-    display: flex; align-items: center; gap: 16px;
-    background: rgba(0,0,0,0.22);
+    height:24px; padding:0 16px;
+    border-top:1px solid var(--border2);
+    display:flex; align-items:center; gap:16px;
+    background:rgba(0,0,0,.22); flex-shrink:0;
   }
-  .status-item {
-    font-family: var(--mono); font-size: 10px;
-    color: var(--muted);
-    display: flex; align-items: center; gap: 5px;
+  .status-item{
+    font-family:var(--mono);font-size:10px;
+    color:var(--muted);display:flex;align-items:center;gap:5px;
   }
-  .status-dot {
-    width: 5px; height: 5px; border-radius: 50%;
-    background: var(--accent); box-shadow: 0 0 4px var(--accent);
-    animation: statusPulse 2.8s ease-in-out infinite;
+  .status-dot{
+    width:5px;height:5px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 4px var(--accent);
+    animation:statusPulse 2.8s ease-in-out infinite;
   }
-  @keyframes statusPulse {
-    0%,100%{ opacity:1; } 50%{ opacity:0.25; }
-  }
-  .status-right { margin-left: auto; opacity: 0.4; }
+  @keyframes statusPulse{0%,100%{opacity:1}50%{opacity:.25}}
+  .status-right{margin-left:auto;opacity:.4;}
 
-  /* toast */
+  /* ── Spotlight overlay ── */
+  .spotlight-overlay {
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.6);
+    backdrop-filter:blur(12px);
+    z-index:200;
+    display:none; align-items:flex-start; justify-content:center;
+    padding-top:18vh;
+    animation:fadeIn .15s ease;
+  }
+  .spotlight-overlay.open{display:flex;}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+  .spotlight-box {
+    width:min(640px, 90vw);
+    background:rgba(28,28,38,.92);
+    border:1px solid rgba(127,255,178,.15);
+    border-radius:14px;
+    box-shadow:0 24px 80px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.05) inset;
+    overflow:hidden;
+    animation:spotlightPop .25s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes spotlightPop{
+    from{opacity:0;transform:scale(.94) translateY(-10px)}
+    to{opacity:1;transform:scale(1) translateY(0)}
+  }
+  .spotlight-input-wrap {
+    display:flex; align-items:center; gap:12px;
+    padding:16px 20px; border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .spotlight-icon{font-size:18px;opacity:.5;}
+  #spotlight-input {
+    flex:1; background:none; border:none; outline:none;
+    font-family:var(--mono); font-size:16px; color:var(--text);
+    letter-spacing:.02em;
+  }
+  #spotlight-input::placeholder{color:var(--muted);opacity:.5;}
+  .spotlight-results{max-height:320px;overflow-y:auto;}
+  .spotlight-section-label {
+    font-family:var(--mono); font-size:9px;
+    letter-spacing:.18em; color:var(--muted); opacity:.5;
+    text-transform:uppercase; padding:10px 20px 4px;
+  }
+  .spotlight-row {
+    display:flex; align-items:center; gap:12px;
+    padding:9px 20px; cursor:pointer;
+    transition:background .1s;
+    font-family:var(--mono); font-size:12px; color:var(--muted);
+  }
+  .spotlight-row:hover,.spotlight-row.selected{
+    background:rgba(127,255,178,.08); color:var(--text);
+  }
+  .spotlight-row-icon{font-size:14px;width:20px;text-align:center;flex-shrink:0;}
+  .spotlight-row-name{flex:1;}
+  .spotlight-row-hint{font-size:10px;opacity:.4;}
+  .spotlight-footer{
+    padding:8px 20px;
+    border-top:1px solid rgba(255,255,255,.05);
+    display:flex; gap:16px; align-items:center;
+  }
+  .spotlight-shortcut{
+    font-family:var(--mono);font-size:9px;color:var(--muted);opacity:.4;
+    display:flex;align-items:center;gap:4px;
+  }
+  .kbd {
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+    border-radius:3px;padding:1px 5px;font-size:9px;
+  }
+
+  /* ── Notification center ── */
+  .notif-panel {
+    position:fixed; top:0; right:-320px; bottom:0;
+    width:300px;
+    background:rgba(15,15,22,.95);
+    backdrop-filter:blur(20px);
+    border-left:1px solid var(--border);
+    z-index:150;
+    transition:right .35s cubic-bezier(.22,1,.36,1);
+    display:flex; flex-direction:column;
+    box-shadow:-12px 0 40px rgba(0,0,0,.5);
+  }
+  .notif-panel.open{right:0;}
+  .notif-header{
+    padding:52px 18px 14px;
+    border-bottom:1px solid var(--border2);
+    font-family:var(--mono); font-size:13px; font-weight:700;
+    color:var(--text); letter-spacing:.04em;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .notif-close{
+    font-size:16px;cursor:pointer;color:var(--muted);
+    transition:color .15s;
+  }
+  .notif-close:hover{color:var(--text);}
+  .notif-list{flex:1;overflow-y:auto;padding:12px;}
+  .notif-card{
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--border2);
+    border-radius:10px; padding:12px 14px; margin-bottom:10px;
+    animation:slideInFile .3s cubic-bezier(.22,1,.36,1) both;
+  }
+  .notif-card-header{
+    display:flex;align-items:center;gap:8px;margin-bottom:4px;
+  }
+  .notif-card-app{
+    font-family:var(--mono);font-size:10px;
+    color:var(--accent);letter-spacing:.08em;text-transform:uppercase;
+  }
+  .notif-card-time{
+    font-family:var(--mono);font-size:9px;
+    color:var(--muted);margin-left:auto;opacity:.5;
+  }
+  .notif-card-title{
+    font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;
+  }
+  .notif-card-body{
+    font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.5;
+  }
+  .notif-empty{
+    text-align:center;padding:40px 20px;
+    font-family:var(--mono);font-size:11px;color:var(--muted);opacity:.4;
+  }
+
+  /* ── toast ── */
   .toast {
-    position: fixed; bottom: 32px; right: 32px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px 18px;
-    display: flex; align-items: center; gap: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6),
-                0 0 0 1px rgba(255,255,255,0.04) inset;
-    transform: translateY(80px) scale(0.94);
-    opacity: 0;
-    transition: all 0.42s cubic-bezier(0.34,1.56,0.64,1);
-    z-index: 100; pointer-events: none;
+    position:fixed; bottom:32px; right:32px;
+    background:var(--surface2); border:1px solid var(--border);
+    border-radius:12px; padding:14px 18px;
+    display:flex; align-items:center; gap:12px;
+    box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04) inset;
+    transform:translateY(80px) scale(.94); opacity:0;
+    transition:all .42s cubic-bezier(.34,1.56,.64,1);
+    z-index:100; pointer-events:none;
   }
-  .toast.show { transform: translateY(0) scale(1); opacity: 1; }
-  .toast-icon {
-    width: 30px; height: 30px; border-radius: 50%;
-    background: rgba(127,255,178,0.12);
-    border: 1px solid rgba(127,255,178,0.28);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; color: var(--accent); flex-shrink: 0;
+  .toast.show{transform:translateY(0) scale(1);opacity:1;}
+  .toast-icon{
+    width:30px;height:30px;border-radius:50%;
+    background:rgba(127,255,178,.12); border:1px solid rgba(127,255,178,.28);
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;color:var(--accent);flex-shrink:0;
   }
-  .toast-title { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text); }
-  .toast-sub   { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .toast-title{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);}
+  .toast-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;}
 
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  ::-webkit-scrollbar{width:5px;height:5px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--muted);}
 </style>
 </head>
 <body>
 
-<div class="container">
+<!-- Spotlight overlay -->
+<div class="spotlight-overlay" id="spotlight" onclick="closeSpotlight(event)">
+  <div class="spotlight-box">
+    <div class="spotlight-input-wrap">
+      <span class="spotlight-icon">🔍</span>
+      <input id="spotlight-input" placeholder="Spotlight 検索" autocomplete="off" oninput="filterSpotlight(this.value)" onkeydown="spotlightKey(event)">
+    </div>
+    <div class="spotlight-results" id="spotlight-results"></div>
+    <div class="spotlight-footer">
+      <span class="spotlight-shortcut"><span class="kbd">↑↓</span> 選択</span>
+      <span class="spotlight-shortcut"><span class="kbd">↵</span> 実行</span>
+      <span class="spotlight-shortcut"><span class="kbd">esc</span> 閉じる</span>
+    </div>
+  </div>
+</div>
+
+<!-- Notification panel -->
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-header">
+    通知センター
+    <span class="notif-close" onclick="closeNotif()">✕</span>
+  </div>
+  <div class="notif-list" id="notif-list">
+    <div class="notif-empty">通知はありません</div>
+  </div>
+</div>
+
+<div class="page">
   <header>
     <div class="badge">utility tool</div>
     <h1>tree <span>→</span> zip</h1>
     <p class="subtitle">ファイルツリーを入力 → 内容を編集 → ZIPでダウンロード</p>
   </header>
 
+  <!-- fake menu bar -->
+  <div class="fake-menubar">
+    <span class="fmb-apple">&#63743;</span>
+    <span class="fmb-item bold">tree-to-zip</span>
+    <span class="fmb-item">File</span>
+    <span class="fmb-item">Edit</span>
+    <span class="fmb-item">View</span>
+    <span class="fmb-item">Help</span>
+    <div class="fmb-right">
+      <span class="fmb-icon" title="Wi-Fi">📶</span>
+      <span class="fmb-icon" title="Battery">🔋</span>
+      <span class="fmb-icon" onclick="toggleNotif()" title="通知センター">🔔</span>
+      <span class="fmb-icon" onclick="openSpotlight()" title="Spotlight (⌘Space)">🔍</span>
+      <span id="fmb-clock">--:--</span>
+    </div>
+  </div>
+
   <div class="mac-window">
 
     <!-- titlebar -->
     <div class="titlebar">
       <div class="traffic-lights">
-        <div class="tl tl-red"></div>
-        <div class="tl tl-yellow"></div>
-        <div class="tl tl-green"></div>
+        <div class="tl tl-red"   title="閉じる"></div>
+        <div class="tl tl-yellow" title="最小化"></div>
+        <div class="tl tl-green"  title="フルスクリーン"></div>
       </div>
       <span class="titlebar-title" id="win-title">tree-to-zip — new project</span>
-    </div>
-
-    <!-- tabbar -->
-    <div class="tabbar">
-      <div class="tab active" id="tab-input" onclick="switchTab('input')">
-        <span class="tab-dot"></span>tree input
-      </div>
-      <div class="tab" id="tab-files" onclick="switchTab('files')">
-        <span class="tab-dot"></span>files
-        <span class="tab-badge" id="tab-badge"></span>
+      <div class="titlebar-btns">
+        <span class="titlebar-btn" onclick="openSpotlight()">⌘ Space</span>
       </div>
     </div>
 
-    <!-- INPUT PANEL -->
-    <div class="panel active" id="panel-input">
-      <div class="input-area">
-        <div class="editor-wrap">
-          <div class="line-numbers" id="line-numbers"><span>1</span></div>
-          <textarea id="tree-input" spellcheck="false"
-            placeholder="my-project
+    <!-- window body: sidebar + main -->
+    <div class="window-body">
+
+      <!-- sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-label">Favorites</div>
+          <div class="sidebar-item active" onclick="switchTab('input')">
+            <span class="si-icon">📝</span>
+            <span class="si-label">Tree Input</span>
+          </div>
+          <div class="sidebar-item" onclick="switchTab('files')">
+            <span class="si-icon">📁</span>
+            <span class="si-label">Files</span>
+            <span class="si-badge" id="sb-badge" style="display:none"></span>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Recents</div>
+          <div id="sb-recents">
+            <div class="sidebar-item" style="opacity:.35;font-size:10px;padding-left:18px;">なし</div>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Activity</div>
+          <div class="sidebar-mini-graph">
+            <div class="smg-label">file count</div>
+            <div class="smg-bars" id="smg-bars">
+              <div class="smg-bar" style="height:8%"></div>
+              <div class="smg-bar" style="height:12%"></div>
+              <div class="smg-bar" style="height:6%"></div>
+              <div class="smg-bar" style="height:18%"></div>
+              <div class="smg-bar" style="height:9%"></div>
+              <div class="smg-bar" style="height:5%"></div>
+              <div class="smg-bar" style="height:3%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- main area -->
+      <div class="main-area">
+
+        <!-- tabbar -->
+        <div class="tabbar">
+          <div class="tab active" id="tab-input" onclick="switchTab('input')">
+            <span class="tab-dot"></span>tree input
+          </div>
+          <div class="tab" id="tab-files" onclick="switchTab('files')">
+            <span class="tab-dot"></span>files
+            <span class="tab-badge" id="tab-badge"></span>
+          </div>
+        </div>
+
+        <!-- INPUT PANEL -->
+        <div class="panel active" id="panel-input">
+          <div class="input-area">
+            <div class="editor-wrap">
+              <div class="line-numbers" id="line-numbers"><span>1</span></div>
+              <textarea id="tree-input" spellcheck="false"
+                placeholder="my-project
  ├ server.js
  ├ package.json
  └ public
      └ index.html"
-            oninput="updateLineNumbers(this)"></textarea>
+                oninput="updateLineNumbers(this)"></textarea>
+            </div>
+            <div class="hint">
+              <strong>├ └ │</strong> などのツリー文字か、スペース／タブのインデントに対応。最初の行がルートディレクトリ名になります。
+            </div>
+          </div>
+          <div id="error-msg" class="error-msg"></div>
+          <div class="toolbar">
+            <button class="btn-parse" onclick="parseTree()">▶ Parse</button>
+            <button class="btn-ghost" onclick="clearAll()">Clear</button>
+          </div>
         </div>
-        <div class="hint">
-          <strong>├ └ │</strong> などのツリー文字か、スペース／タブのインデントに対応。最初の行がルートディレクトリ名になります。
-        </div>
-      </div>
-      <div id="error-msg" class="error-msg"></div>
-      <div class="toolbar">
-        <button class="btn-parse" onclick="parseTree()">▶ Parse</button>
-        <button class="btn-ghost" onclick="clearAll()">Clear</button>
-      </div>
-    </div>
 
-    <!-- FILES PANEL -->
-    <div class="panel" id="panel-files">
-      <div class="files-panel-header">
-        <span class="files-panel-title">Edit file contents</span>
-        <span class="pill" id="file-count">0 files</span>
-      </div>
-      <div class="files-list" id="files-list">
-        <div class="empty-state">
-          <div class="empty-icon">📂</div>
-          <div class="empty-text">ツリーを入力して Parse してください</div>
+        <!-- FILES PANEL -->
+        <div class="panel" id="panel-files">
+          <div class="files-panel-header">
+            <span class="files-panel-title">Edit file contents</span>
+            <span class="pill" id="file-count">0 files</span>
+          </div>
+          <div class="files-list" id="files-list">
+            <div class="empty-state">
+              <div class="empty-icon">📂</div>
+              <div class="empty-text">ツリーを入力して Parse してください</div>
+            </div>
+          </div>
+          <div class="toolbar">
+            <button class="btn-ghost" onclick="switchTab('input')">← Edit Tree</button>
+            <span class="spacer"></span>
+            <button class="btn-download" onclick="downloadZip()">⬇ Download ZIP</button>
+          </div>
         </div>
-      </div>
-      <div class="toolbar">
-        <button class="btn-ghost" onclick="switchTab('input')">← Edit Tree</button>
-        <span class="spacer"></span>
-        <button class="btn-download" onclick="downloadZip()">⬇ Download ZIP</button>
-      </div>
-    </div>
+
+      </div><!-- /main-area -->
+    </div><!-- /window-body -->
 
     <!-- statusbar -->
     <div class="statusbar">
@@ -569,39 +855,60 @@
         <div class="status-dot"></div>
         <span id="status-text">ready</span>
       </div>
-      <div class="status-item status-right">tree → zip v2</div>
+      <div class="status-item" id="status-mid" style="margin-left:16px;"></div>
+      <div class="status-item status-right">tree → zip v2 &nbsp;|&nbsp; ⌘Space to search</div>
     </div>
 
-  </div>
-</div>
+  </div><!-- /mac-window -->
+</div><!-- /page -->
 
 <!-- toast -->
 <div class="toast" id="toast">
   <div class="toast-icon">✓</div>
   <div>
     <div class="toast-title" id="toast-title">downloaded</div>
-    <div class="toast-sub" id="toast-sub">ダウンロードが開始されました</div>
+    <div class="toast-sub"  id="toast-sub">ダウンロードが開始されました</div>
   </div>
 </div>
 
 <script>
-/* line numbers */
+/* ── clock ── */
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('fmb-clock').textContent =
+    ['日','月','火','水','木','金','土'][now.getDay()] + ' ' + h + ':' + m;
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+/* ── keyboard ── */
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.code === 'Space') { e.preventDefault(); openSpotlight(); }
+  if (e.key === 'Escape') { closeSpotlightFull(); closeNotif(); }
+});
+
+/* ── line numbers ── */
 function updateLineNumbers(ta) {
   const n = ta.value.split('\n').length;
   document.getElementById('line-numbers').innerHTML =
-    Array.from({length: Math.max(n,1)}, (_,i) => `<span>${i+1}</span>`).join('');
+    Array.from({length:Math.max(n,1)},(_,i)=>`<span>${i+1}</span>`).join('');
 }
 updateLineNumbers(document.getElementById('tree-input'));
 
-/* tabs */
+/* ── tabs & sidebar ── */
 function switchTab(name) {
   ['input','files'].forEach(t => {
     document.getElementById('tab-'+t).classList.toggle('active', t===name);
     document.getElementById('panel-'+t).classList.toggle('active', t===name);
   });
+  document.querySelectorAll('.sidebar-item').forEach((el,i) => {
+    el.classList.toggle('active', (i===0&&name==='input')||(i===1&&name==='files'));
+  });
 }
 
-/* icons */
+/* ── icons ── */
 const ICONS = {
   js:'📜',ts:'📘',jsx:'⚛️',tsx:'⚛️',
   html:'🌐',css:'🎨',scss:'🎨',sass:'🎨',
@@ -614,7 +921,9 @@ const ICONS = {
 const getExt  = n => { const p=n.split('.'); return p.length>1?p[p.length-1].toLowerCase():''; };
 const getIcon = n => ICONS[getExt(n)] || ICONS.default;
 
-/* parse */
+/* ── parse ── */
+const history = [];
+
 function parseTree() {
   const raw = document.getElementById('tree-input').value.trim();
   showError('');
@@ -623,11 +932,24 @@ function parseTree() {
   if (!files.length) { showError('ファイルが検出できませんでした。'); return; }
 
   const root = raw.split('\n')[0].replace(/[│├└─┤┐┘┼╔╗╚╝╠╣╦╩╬\s]/g,'').trim();
-  document.getElementById('win-title').textContent = `tree-to-zip — ${root}`;
+  document.getElementById('win-title').textContent = 'tree-to-zip — ' + root;
 
   renderFiles(files);
   switchTab('files');
-  setStatus(`${files.length} files parsed`);
+  setStatus(files.length + ' files parsed');
+
+  // sidebar badge
+  const b = document.getElementById('sb-badge');
+  b.textContent = files.length; b.style.display='inline';
+
+  // graph
+  animateGraph(files.length);
+
+  // recents
+  addRecent(root, files.length);
+
+  // notification
+  pushNotif('tree-to-zip', root + ' をパース', files.length + ' ファイルを検出しました');
 }
 
 function extractFiles(text) {
@@ -635,27 +957,19 @@ function extractFiles(text) {
   const files = [];
   const root  = lines[0].replace(/[│├└─┤┐┘┼╔╗╚╝╠╣╦╩╬\s]/g,'').trim();
   const dirs  = [];
-
-  for (let i=1; i<lines.length; i++) {
+  for (let i=1;i<lines.length;i++) {
     const line = lines[i];
     if (!line.trim()) continue;
-
-    const clean = line
-      .replace(/├/g,' ').replace(/└/g,' ')
-      .replace(/│/g,' ').replace(/─/g,' ')
-      .replace(/[┤┐┘┼╔╗╚╝╠╣╦╩╬]/g,' ');
-
+    const clean = line.replace(/├/g,' ').replace(/└/g,' ').replace(/│/g,' ').replace(/─/g,' ').replace(/[┤┐┘┼╔╗╚╝╠╣╦╩╬]/g,' ');
     const spaces = clean.length - clean.trimStart().length;
-    const depth  = Math.max(1, Math.ceil(spaces/2));
+    const depth  = Math.max(1,Math.ceil(spaces/2));
     const name   = clean.trim();
     if (!name) continue;
-
     if (looksLikeFile(name)) {
-      const parents = dirs.slice(0, depth-1).filter(Boolean);
-      files.push({ path: [root, ...parents, name].join('/') });
+      const parents = dirs.slice(0,depth-1).filter(Boolean);
+      files.push({ path:[root,...parents,name].join('/') });
     } else {
-      dirs[depth-1] = name;
-      dirs.length = depth;
+      dirs[depth-1]=name; dirs.length=depth;
     }
   }
   return files;
@@ -663,112 +977,198 @@ function extractFiles(text) {
 
 function looksLikeFile(n) {
   if (n.includes('.')) return true;
-  return ['makefile','dockerfile','procfile','readme','license',
-          'gitignore','gitattributes','.env','.babelrc','.eslintrc']
+  return ['makefile','dockerfile','procfile','readme','license','gitignore','gitattributes','.env','.babelrc','.eslintrc']
     .includes(n.toLowerCase()) || n.startsWith('.');
 }
 
-/* render */
+/* ── render files ── */
 function renderFiles(files) {
   const list = document.getElementById('files-list');
-  list.innerHTML = '';
-  document.getElementById('file-count').textContent = `${files.length} file${files.length!==1?'s':''}`;
+  list.innerHTML='';
+  document.getElementById('file-count').textContent = files.length+' file'+(files.length!==1?'s':'');
   const badge = document.getElementById('tab-badge');
-  badge.textContent = files.length;
-  badge.style.display = 'inline';
+  badge.textContent=files.length; badge.style.display='inline';
 
-  files.forEach((f, i) => {
+  files.forEach((f,i) => {
     const fname = f.path.split('/').pop();
     const fdir  = f.path.split('/').slice(0,-1).join('/');
     const ext   = getExt(fname);
-
-    const el = document.createElement('div');
-    el.className = 'file-item' + (i===0?' open':'');
-    el.style.animationDelay = `${i*0.04}s`;
-    el.innerHTML = `
+    const el    = document.createElement('div');
+    el.className='file-item'+(i===0?' open':'');
+    el.style.animationDelay=i*0.04+'s';
+    el.innerHTML=`
       <div class="file-header" onclick="toggleFile(this.parentElement)">
         <span class="file-icon">${getIcon(fname)}</span>
         <div class="file-path-wrap">
           <div class="file-name">${fname}</div>
-          ${fdir ? `<div class="file-dir">${fdir}/</div>` : ''}
+          ${fdir?`<div class="file-dir">${fdir}/</div>`:''}
         </div>
-        ${ext ? `<span class="file-ext">.${ext}</span>` : ''}
-        <div class="chevron">
-          <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8">
-            <polyline points="3,2 7,5 3,8"/>
-          </svg>
-        </div>
+        ${ext?`<span class="file-ext">.${ext}</span>`:''}
+        <div class="chevron"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3,2 7,5 3,8"/></svg></div>
       </div>
-      <div class="file-content-wrap">
-        <div class="file-content-inner">
-          <div class="file-content-inner-pad">
-            <textarea class="file-content"
-              placeholder="// ${fname} の内容&#10;// 空のままでも OK"
-              data-path="${f.path}"></textarea>
-          </div>
-        </div>
-      </div>`;
+      <div class="file-content-wrap"><div class="file-content-inner"><div class="file-content-inner-pad">
+        <textarea class="file-content" placeholder="// ${fname} の内容&#10;// 空のままでも OK" data-path="${f.path}"></textarea>
+      </div></div></div>`;
     list.appendChild(el);
   });
 }
 
-function toggleFile(item) { item.classList.toggle('open'); }
+function toggleFile(item){ item.classList.toggle('open'); }
 
-/* download */
+/* ── download ── */
 async function downloadZip() {
   const tas = document.querySelectorAll('.file-content');
-  if (!tas.length) { showError('まずツリーをパースしてください。'); return; }
-
-  const zip  = new JSZip();
+  if (!tas.length){ showError('まずツリーをパースしてください。'); return; }
+  const zip = new JSZip();
   tas.forEach(ta => {
     const p = ta.dataset.path.replace(/\\/g,'/').replace(/^\//,'');
-    zip.file(p, ta.value, { binary: false });
+    zip.file(p, ta.value, {binary:false});
   });
-
-  const root = tas[0].dataset.path.split('/')[0] || 'project';
+  const root = tas[0].dataset.path.split('/')[0]||'project';
   try {
     setStatus('generating zip…');
-    const blob = await zip.generateAsync({ type: 'blob' });
+    const blob = await zip.generateAsync({type:'blob'});
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
-    a.href = url; a.download = root + '.zip'; a.click();
+    a.href=url; a.download=root+'.zip'; a.click();
     URL.revokeObjectURL(url);
-    showToast(root + '.zip', `${tas.length} files packed`);
-    setStatus(`${root}.zip downloaded`);
-  } catch(e) {
-    showError('ZIPの生成に失敗しました: ' + e.message);
-  }
+    showToast(root+'.zip', tas.length+' files packed');
+    setStatus(root+'.zip downloaded');
+    pushNotif('tree-to-zip', root+'.zip をダウンロード', tas.length+' ファイルをパック');
+  } catch(e){ showError('ZIPの生成に失敗しました: '+e.message); }
 }
 
-/* clear */
+/* ── clear ── */
 function clearAll() {
   const ta = document.getElementById('tree-input');
-  ta.value = '';
-  updateLineNumbers(ta);
-  document.getElementById('files-list').innerHTML = `
-    <div class="empty-state">
-      <div class="empty-icon">📂</div>
-      <div class="empty-text">ツリーを入力して Parse してください</div>
-    </div>`;
-  document.getElementById('file-count').textContent = '0 files';
-  document.getElementById('tab-badge').style.display = 'none';
-  document.getElementById('win-title').textContent = 'tree-to-zip — new project';
+  ta.value=''; updateLineNumbers(ta);
+  document.getElementById('files-list').innerHTML=`<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-text">ツリーを入力して Parse してください</div></div>`;
+  document.getElementById('file-count').textContent='0 files';
+  document.getElementById('tab-badge').style.display='none';
+  document.getElementById('sb-badge').style.display='none';
+  document.getElementById('win-title').textContent='tree-to-zip — new project';
   showError(''); setStatus('ready'); switchTab('input');
 }
 
-/* helpers */
-function showError(msg) {
-  const el = document.getElementById('error-msg');
-  el.textContent = msg;
-  el.classList.toggle('visible', !!msg);
+/* ── mini graph ── */
+const graphHistory = [8,12,6,18,9,5,3];
+function animateGraph(n) {
+  graphHistory.push(Math.min(n,30));
+  if (graphHistory.length>7) graphHistory.shift();
+  const max = Math.max(...graphHistory,1);
+  const bars = document.getElementById('smg-bars');
+  bars.innerHTML = graphHistory.map((v,i) => {
+    const pct = Math.round(v/max*100);
+    const active = i===graphHistory.length-1;
+    return `<div class="smg-bar" style="height:${Math.max(pct,3)}%;animation-delay:${i*0.04}s;${active?'background:rgba(127,255,178,.45)':''}"></div>`;
+  }).join('');
 }
-function setStatus(msg) { document.getElementById('status-text').textContent = msg; }
+
+/* ── recents ── */
+const recentsData = [];
+function addRecent(name, count) {
+  recentsData.unshift({name,count,time:new Date()});
+  if (recentsData.length>4) recentsData.pop();
+  const el = document.getElementById('sb-recents');
+  el.innerHTML = recentsData.map(r =>
+    `<div class="sidebar-item" style="animation:slideInFile .25s ease both">
+      <span class="si-icon">🗂</span>
+      <span class="si-label">${r.name}</span>
+      <span class="si-badge">${r.count}</span>
+    </div>`).join('');
+}
+
+/* ── spotlight ── */
+const SPOTLIGHT_CMDS = [
+  {icon:'▶', name:'Parse Tree',        hint:'ツリーをパース',         action:()=>{closeSpotlightFull();parseTree();}},
+  {icon:'⬇', name:'Download ZIP',      hint:'ZIPをダウンロード',      action:()=>{closeSpotlightFull();downloadZip();}},
+  {icon:'🗑', name:'Clear',             hint:'入力をクリア',           action:()=>{closeSpotlightFull();clearAll();}},
+  {icon:'📝', name:'Tree Input',        hint:'タブ切り替え',           action:()=>{closeSpotlightFull();switchTab('input');}},
+  {icon:'📁', name:'Files',            hint:'タブ切り替え',           action:()=>{closeSpotlightFull();switchTab('files');}},
+  {icon:'🔔', name:'通知センター',      hint:'通知を表示',             action:()=>{closeSpotlightFull();toggleNotif();}},
+];
+let slIdx = 0;
+
+function openSpotlight() {
+  document.getElementById('spotlight').classList.add('open');
+  setTimeout(()=>document.getElementById('spotlight-input').focus(),50);
+  filterSpotlight('');
+}
+function closeSpotlight(e) {
+  if (e.target===document.getElementById('spotlight')) closeSpotlightFull();
+}
+function closeSpotlightFull() {
+  document.getElementById('spotlight').classList.remove('open');
+  document.getElementById('spotlight-input').value='';
+}
+
+function filterSpotlight(q) {
+  const results = q
+    ? SPOTLIGHT_CMDS.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.hint.includes(q))
+    : SPOTLIGHT_CMDS;
+  slIdx=0;
+  const el = document.getElementById('spotlight-results');
+  if (!results.length) { el.innerHTML='<div style="padding:20px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted);opacity:.4;">結果なし</div>'; return; }
+  el.innerHTML = '<div class="spotlight-section-label">コマンド</div>' +
+    results.map((r,i)=>`
+      <div class="spotlight-row${i===0?' selected':''}" onclick="r${i}=SPOTLIGHT_CMDS.find(x=>x.name==='${r.name}');if(r${i})r${i}.action()" data-idx="${i}">
+        <span class="spotlight-row-icon">${r.icon}</span>
+        <span class="spotlight-row-name">${r.name}</span>
+        <span class="spotlight-row-hint">${r.hint}</span>
+      </div>`).join('');
+}
+
+function spotlightKey(e) {
+  const rows = document.querySelectorAll('.spotlight-row');
+  if (!rows.length) return;
+  if (e.key==='ArrowDown') { slIdx=Math.min(slIdx+1,rows.length-1); highlightRow(rows); e.preventDefault(); }
+  if (e.key==='ArrowUp')   { slIdx=Math.max(slIdx-1,0); highlightRow(rows); e.preventDefault(); }
+  if (e.key==='Enter') { rows[slIdx]&&rows[slIdx].click(); }
+}
+function highlightRow(rows) {
+  rows.forEach((r,i)=>r.classList.toggle('selected',i===slIdx));
+  rows[slIdx].scrollIntoView({block:'nearest'});
+}
+
+/* ── notifications ── */
+const notifs = [];
+function pushNotif(app, title, body) {
+  notifs.unshift({app, title, body, time: new Date()});
+  renderNotifs();
+}
+function renderNotifs() {
+  const el = document.getElementById('notif-list');
+  if (!notifs.length) { el.innerHTML='<div class="notif-empty">通知はありません</div>'; return; }
+  const fmt = d => d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+  el.innerHTML = notifs.map((n,i)=>`
+    <div class="notif-card" style="animation-delay:${i*.04}s">
+      <div class="notif-card-header">
+        <span class="notif-card-app">${n.app}</span>
+        <span class="notif-card-time">${fmt(n.time)}</span>
+      </div>
+      <div class="notif-card-title">${n.title}</div>
+      <div class="notif-card-body">${n.body}</div>
+    </div>`).join('');
+}
+function toggleNotif() {
+  document.getElementById('notif-panel').classList.toggle('open');
+}
+function closeNotif() {
+  document.getElementById('notif-panel').classList.remove('open');
+}
+
+/* ── helpers ── */
+function showError(msg) {
+  const el=document.getElementById('error-msg');
+  el.textContent=msg; el.classList.toggle('visible',!!msg);
+}
+function setStatus(msg){ document.getElementById('status-text').textContent=msg; }
 function showToast(title, sub) {
-  document.getElementById('toast-title').textContent = title;
-  document.getElementById('toast-sub').textContent   = sub;
-  const t = document.getElementById('toast');
+  document.getElementById('toast-title').textContent=title;
+  document.getElementById('toast-sub').textContent=sub;
+  const t=document.getElementById('toast');
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3200);
+  setTimeout(()=>t.classList.remove('show'),3200);
 }
 </script>
 </body>
