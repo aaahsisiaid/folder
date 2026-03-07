@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>tree → zip</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{
@@ -15,6 +15,7 @@
   --text:#e8e8f0;--muted:#5a5a7a;
   --mono:'Space Mono',monospace;
   --sys:'ui-monospace','Menlo','Monaco','Cascadia Mono','Segoe UI Mono','Courier New',monospace;
+  --eng:'Share Tech Mono','Share Tech','OCR-A','OCR-B',monospace;
   --sidebar-w:210px;
   --app-font:var(--mono);
 }
@@ -465,6 +466,7 @@ button:active{transform:scale(.96) !important;}
       <div class="mb-dd">
         <div class="mb-di checked" id="fd-design" onclick="closeMenus();setFont('design')">Design Mono</div>
         <div class="mb-di" id="fd-system" onclick="closeMenus();setFont('system')">System Mono</div>
+        <div class="mb-di" id="fd-eng" onclick="closeMenus();setFont('eng')">機械彫刻用標準書体</div>
       </div>
     </div>
 
@@ -579,10 +581,12 @@ function closeMenus(){document.querySelectorAll('.mb-menu.open').forEach(m=>m.cl
 let curFont='design';
 function setFont(f){
   curFont=f;
-  document.documentElement.style.setProperty('--app-font',f==='system'?'var(--sys)':'var(--mono)');
+  document.documentElement.style.setProperty('--app-font',f==='system'?'var(--sys)':f==='eng'?'var(--eng)':'var(--mono)');
   document.getElementById('fd-design').classList.toggle('checked',f==='design');
   document.getElementById('fd-system').classList.toggle('checked',f==='system');
-  pushNotif('Font','フォント変更',f==='system'?'System Mono':'Space Mono');
+  document.getElementById('fd-eng').classList.toggle('checked',f==='eng');
+  const fontNames={'design':'Space Mono','system':'System Mono','eng':'機械彫刻用標準書体'};
+  pushNotif('Font','フォント変更',fontNames[f]||f);
 }
 
 // ─── localStorage recents ───
@@ -946,6 +950,7 @@ const SP=[
   {i:`<svg viewBox="0 0 14 14"><rect x="2" y="2" width="10" height="10" rx="2"/><path d="M5 6h4M5 9h2"/></svg>`,n:'通知センター',h:'通知を開く',a:()=>{spClose();openNotif();}},
   {i:`<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="3"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2"/></svg>`,n:'Font: Design Mono',h:'Space Mono に変更',a:()=>{spClose();setFont('design');}},
   {i:`<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="3"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2"/></svg>`,n:'Font: System Mono',h:'Menlo/Consolas に変更',a:()=>{spClose();setFont('system');}},
+  {i:`<svg viewBox="0 0 14 14"><path d="M2 4h10M2 7h10M2 10h10"/><path d="M2 4v6M12 4v6"/></svg>`,n:'Font: 機械彫刻用標準書体',h:'Share Tech Mono / ISO 3098',a:()=>{spClose();setFont('eng');}},
 ];
 let spIdx=0,spF=SP;
 function openSpotlight(){document.getElementById('spotlight').classList.add('open');setTimeout(()=>document.getElementById('sp-in').focus(),40);spFilter('');}
