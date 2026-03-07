@@ -8,523 +8,409 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-  :root {
-    --bg:#0a0a0f; --surface:#13131a; --surface2:#1a1a24;
-    --border:#2a2a3a; --border2:#1e1e2e;
-    --accent:#7fffb2; --accent2:#ff7f50;
-    --text:#e8e8f0; --muted:#5a5a7a;
-    --mono:'Space Mono',monospace;
-    --sans:'Noto Sans JP',sans-serif;
-    --sys:'ui-monospace','Menlo','Monaco','Cascadia Mono','Segoe UI Mono','Courier New',monospace;
-    --sidebar-w:200px;
-    --app-font:var(--mono);
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0a0f;--surface:#13131a;--surface2:#1a1a24;
+  --border:#2a2a3a;--border2:#1e1e2e;
+  --accent:#7fffb2;--accent2:#ff7f50;
+  --text:#e8e8f0;--muted:#5a5a7a;
+  --mono:'Space Mono',monospace;
+  --sys:'ui-monospace','Menlo','Monaco','Cascadia Mono','Segoe UI Mono','Courier New',monospace;
+  --sidebar-w:210px;
+  --app-font:var(--mono);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--app-font);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:28px 36px 60px;position:relative;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(127,255,178,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(127,255,178,.02) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0;
+  animation:gridDrift 24s linear infinite;
+}
+@keyframes gridDrift{from{background-position:0 0}to{background-position:40px 40px}}
+body::after{
+  content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);
+  width:900px;height:600px;
+  background:radial-gradient(ellipse,rgba(127,255,178,.04) 0%,transparent 70%);
+  pointer-events:none;z-index:0;animation:glowPulse 7s ease-in-out infinite;
+}
+@keyframes glowPulse{0%,100%{opacity:.5;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
 
-  body{
-    background:var(--bg); color:var(--text);
-    font-family:var(--app-font);
-    min-height:100vh; display:flex; flex-direction:column;
-    align-items:center; padding:32px 40px 60px;
-    position:relative; overflow-x:hidden;
-  }
-  body::before{
-    content:''; position:fixed; inset:0;
-    background-image:
-      linear-gradient(rgba(127,255,178,.022) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(127,255,178,.022) 1px,transparent 1px);
-    background-size:40px 40px; pointer-events:none; z-index:0;
-    animation:gridDrift 24s linear infinite;
-  }
-  @keyframes gridDrift{from{background-position:0 0}to{background-position:40px 40px}}
-  body::after{
-    content:''; position:fixed; top:-200px; left:50%;
-    transform:translateX(-50%); width:900px; height:600px;
-    background:radial-gradient(ellipse,rgba(127,255,178,.04) 0%,transparent 70%);
-    pointer-events:none; z-index:0;
-    animation:glowPulse 7s ease-in-out infinite;
-  }
-  @keyframes glowPulse{
-    0%,100%{opacity:.5;transform:translateX(-50%) scale(1)}
-    50%{opacity:1;transform:translateX(-50%) scale(1.12)}
-  }
-  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.page{position:relative;z-index:1;width:100%;max-width:1500px;display:flex;flex-direction:column;gap:0;animation:fadeUp .5s cubic-bezier(.22,1,.36,1) both;}
 
-  /* ── page ── */
-  .page{
-    position:relative; z-index:1;
-    width:100%; max-width:1500px;
-    display:flex; flex-direction:column; gap:0;
-    animation:fadeUp .5s cubic-bezier(.22,1,.36,1) both;
-  }
+/* page header */
+.page-header{display:flex;flex-direction:column;gap:5px;margin-bottom:18px;animation:fadeUp .5s .05s cubic-bezier(.22,1,.36,1) both;}
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.badge::before{content:'';width:24px;height:1px;background:var(--accent);}
+h1{font-family:var(--mono);font-size:clamp(20px,2.8vw,40px);font-weight:700;line-height:1.1;letter-spacing:-.02em;}
+h1 span{color:var(--accent);}
+.subtitle{font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;}
 
-  /* ── header above window ── */
-  .page-header{
-    display:flex; flex-direction:column; gap:5px;
-    margin-bottom:20px;
-    animation:fadeUp .5s .05s cubic-bezier(.22,1,.36,1) both;
-  }
-  .badge{
-    font-family:var(--mono); font-size:10px; letter-spacing:.2em;
-    color:var(--accent); text-transform:uppercase;
-    display:flex; align-items:center; gap:8px;
-  }
-  .badge::before{content:'';width:24px;height:1px;background:var(--accent);}
-  h1{font-family:var(--mono);font-size:clamp(22px,3vw,42px);font-weight:700;line-height:1.1;letter-spacing:-.02em;}
-  h1 span{color:var(--accent);}
-  .subtitle{font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;}
+/* ── menu bar ── */
+.menubar{
+  height:26px;padding:0 12px;
+  background:rgba(255,255,255,.02);border:1px solid var(--border);border-bottom:none;
+  border-radius:9px 9px 0 0;display:flex;align-items:center;
+  font-size:11px;color:var(--muted);user-select:none;position:relative;z-index:10;
+  animation:fadeUp .5s .08s cubic-bezier(.22,1,.36,1) both;
+}
+.mb-logo{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);margin-right:12px;letter-spacing:-.02em;cursor:default;}
+.mb-menu{position:relative;}
+.mb-label{padding:0 8px;height:26px;display:flex;align-items:center;cursor:default;border-radius:4px;transition:background .1s;font-family:var(--mono);font-size:11px;white-space:nowrap;}
+.mb-label:hover,.mb-menu.open .mb-label{background:rgba(255,255,255,.08);color:var(--text);}
+.mb-dd{
+  display:none;position:absolute;top:100%;left:0;
+  background:rgba(18,18,28,.97);border:1px solid var(--border);
+  border-radius:7px;min-width:190px;
+  box-shadow:0 12px 40px rgba(0,0,0,.7);
+  padding:4px 0;z-index:200;backdrop-filter:blur(16px);
+}
+.mb-menu.open .mb-dd{display:block;}
+.mb-di{
+  padding:6px 12px;font-family:var(--mono);font-size:11px;
+  color:var(--muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  transition:background .1s,color .1s;
+}
+.mb-di:hover{background:rgba(127,255,178,.08);color:var(--text);}
+.mb-di.danger:hover{background:rgba(255,80,80,.08);color:#ff8080;}
+.mb-di.checked::before{content:'✓';margin-right:6px;color:var(--accent);font-size:10px;}
+.mb-di:not(.checked)::before{content:'';margin-right:16px;}
+.mb-sc{font-size:10px;opacity:.38;white-space:nowrap;}
+.mb-sep{height:1px;background:var(--border2);margin:3px 0;}
+.mb-right{margin-left:auto;display:flex;align-items:center;gap:1px;}
+.mb-rb{
+  padding:0 6px;height:26px;display:flex;align-items:center;gap:3px;
+  cursor:pointer;border-radius:4px;transition:background .1s;
+  font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;
+}
+.mb-rb:hover{background:rgba(255,255,255,.07);color:var(--text);}
+.mb-rb svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+#mb-clock{font-size:10px;padding:0 5px;letter-spacing:.04em;color:var(--text);}
+.notif-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--accent2);font-size:8px;color:#0a0a0f;
+  display:none;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:700;line-height:1;
+  padding:0 1px;min-width:12px;width:auto;border-radius:6px;
+}
+.notif-dot.visible{display:flex;}
 
-  /* ── menu bar ── */
-  .menubar{
-    height:26px; padding:0 14px;
-    background:rgba(255,255,255,.02);
-    border:1px solid var(--border); border-bottom:none;
-    border-radius:9px 9px 0 0;
-    display:flex; align-items:center; gap:0;
-    font-size:11px; color:var(--muted);
-    user-select:none; position:relative; z-index:4;
-    animation:fadeUp .5s .08s cubic-bezier(.22,1,.36,1) both;
-  }
-  .mb-logo{
-    font-family:var(--mono); font-size:13px; font-weight:700;
-    color:var(--accent); margin-right:14px; letter-spacing:-.02em;
-    cursor:default;
-  }
-  /* menu groups */
-  .mb-menu{position:relative;}
-  .mb-menu-label{
-    padding:0 9px; height:26px; display:flex; align-items:center;
-    cursor:default; border-radius:4px; transition:background .12s;
-    font-family:var(--mono); font-size:11px; letter-spacing:.02em;
-    white-space:nowrap;
-  }
-  .mb-menu-label:hover,.mb-menu.open .mb-menu-label{
-    background:rgba(255,255,255,.08); color:var(--text);
-  }
-  /* dropdown */
-  .mb-dropdown{
-    display:none; position:absolute; top:100%; left:0;
-    background:rgba(20,20,30,.97); border:1px solid var(--border);
-    border-radius:7px; min-width:180px;
-    box-shadow:0 12px 40px rgba(0,0,0,.7);
-    padding:4px 0; z-index:200;
-    backdrop-filter:blur(16px);
-  }
-  .mb-menu.open .mb-dropdown{display:block;}
-  .mb-drop-item{
-    padding:6px 14px; font-family:var(--mono); font-size:11px;
-    color:var(--muted); cursor:pointer; display:flex;
-    align-items:center; justify-content:space-between; gap:20px;
-    transition:background .1s, color .1s;
-  }
-  .mb-drop-item:hover{background:rgba(127,255,178,.09);color:var(--text);}
-  .mb-drop-item.danger:hover{background:rgba(255,100,100,.09);color:#ff8080;}
-  .mb-shortcut{font-size:10px;opacity:.4;white-space:nowrap;}
-  .mb-separator{height:1px;background:var(--border2);margin:4px 0;}
-  /* right side */
-  .mb-right{margin-left:auto;display:flex;align-items:center;gap:2px;}
-  .mb-right-btn{
-    padding:0 7px; height:26px; display:flex; align-items:center;
-    cursor:pointer; border-radius:4px; transition:background .12s;
-    font-family:var(--mono); font-size:10px; color:var(--muted);
-    white-space:nowrap; gap:4px;
-  }
-  .mb-right-btn:hover{background:rgba(255,255,255,.07);color:var(--text);}
-  .mb-right-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;}
-  #mb-clock{font-size:10px;padding:0 6px;letter-spacing:.04em;color:var(--text);}
-  /* close on outside click handled by JS */
+/* ── mac window ── */
+.mac-window{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:0 0 12px 12px;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(255,255,255,.04) inset,0 28px 80px rgba(0,0,0,.65);
+  display:flex;flex-direction:column;
+  animation:fadeUp .5s .1s cubic-bezier(.22,1,.36,1) both;
+  position:relative;
+}
+.mac-window::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;z-index:3;
+  background:linear-gradient(90deg,transparent,rgba(127,255,178,.5),transparent);
+}
 
-  /* ── mac window ── */
-  .mac-window{
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:0 0 12px 12px; overflow:hidden;
-    box-shadow:0 0 0 1px rgba(255,255,255,.04) inset,
-               0 28px 80px rgba(0,0,0,.65);
-    display:flex; flex-direction:column;
-    animation:fadeUp .5s .1s cubic-bezier(.22,1,.36,1) both;
-  }
-  .mac-window::before{
-    content:''; position:absolute; top:0; left:0; right:0; height:1px; z-index:3;
-    background:linear-gradient(90deg,transparent,rgba(127,255,178,.5),transparent);
-  }
+/* titlebar */
+.titlebar{
+  height:40px;padding:0 12px;flex-shrink:0;position:relative;
+  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+  border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;user-select:none;
+}
+.tls{display:flex;gap:7px;align-items:center;}
+.tl{width:12px;height:12px;border-radius:50%;cursor:default;position:relative;transition:filter .15s,transform .15s;}
+.tl:hover{filter:brightness(1.3);transform:scale(1.1);}
+.tl::after{content:'';position:absolute;inset:2px;border-radius:50%;background:rgba(255,255,255,.22);}
+.tl-r{background:radial-gradient(circle at 35% 35%,#ff7f73,#ff5f57);box-shadow:0 0 5px rgba(255,95,87,.4);}
+.tl-y{background:radial-gradient(circle at 35% 35%,#ffd870,#ffbd2e);box-shadow:0 0 5px rgba(255,189,46,.4);}
+.tl-g{background:radial-gradient(circle at 35% 35%,#6df97e,#28c941);box-shadow:0 0 5px rgba(40,201,65,.4);}
+.tb-title{position:absolute;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.05em;pointer-events:none;white-space:nowrap;}
 
-  /* titlebar */
-  .titlebar{
-    height:42px; padding:0 14px;
-    background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
-    border-bottom:1px solid var(--border2);
-    display:flex; align-items:center; gap:0;
-    user-select:none; flex-shrink:0; position:relative;
-  }
-  .traffic-lights{display:flex;gap:8px;align-items:center;}
-  .tl{width:12px;height:12px;border-radius:50%;cursor:default;position:relative;transition:filter .15s,transform .15s;}
-  .tl:hover{filter:brightness(1.3);transform:scale(1.1);}
-  .tl::after{content:'';position:absolute;inset:2px;border-radius:50%;background:rgba(255,255,255,.22);}
-  .tl-r{background:radial-gradient(circle at 35% 35%,#ff7f73,#ff5f57);box-shadow:0 0 5px rgba(255,95,87,.4);}
-  .tl-y{background:radial-gradient(circle at 35% 35%,#ffd870,#ffbd2e);box-shadow:0 0 5px rgba(255,189,46,.4);}
-  .tl-g{background:radial-gradient(circle at 35% 35%,#6df97e,#28c941);box-shadow:0 0 5px rgba(40,201,65,.4);}
-  .tb-title{
-    position:absolute;left:50%;transform:translateX(-50%);
-    font-family:var(--mono);font-size:11px;color:var(--muted);
-    letter-spacing:.05em;pointer-events:none;
-  }
+/* window body */
+.window-body{display:flex;flex:1;min-height:0;overflow:hidden;}
 
-  /* window body = sidebar + content */
-  .window-body{display:flex;flex:1;overflow:hidden;}
+/* ── sidebar ── */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;border-right:1px solid var(--border2);background:rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden;}
+.sb-sec{padding:6px 0;border-bottom:1px solid var(--border2);}
+.sb-sec:last-child{border-bottom:none;flex:1;overflow-y:auto;}
+.sb-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;padding:0 10px 3px;opacity:.45;}
+.sb-item{
+  display:flex;align-items:center;gap:7px;padding:5px 10px;
+  cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--muted);
+  transition:background .1s,color .1s;user-select:none;
+}
+.sb-item:hover{background:rgba(255,255,255,.03);color:var(--text);}
+.sb-item.active-project{background:rgba(127,255,178,.07);color:var(--accent);}
+.sb-ico{width:13px;text-align:center;flex-shrink:0;}
+.sb-ico svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;display:block;}
+.sb-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;}
+.sb-cnt{font-size:9px;background:rgba(127,255,178,.12);color:var(--accent);border:1px solid rgba(127,255,178,.2);padding:0 4px;border-radius:3px;flex-shrink:0;}
+.sb-del{
+  width:14px;height:14px;flex-shrink:0;display:none;
+  align-items:center;justify-content:center;
+  color:var(--muted);border-radius:3px;font-size:11px;line-height:1;
+  transition:color .1s,background .1s;
+}
+.sb-item:hover .sb-del{display:flex;}
+.sb-del:hover{color:#ff8080;background:rgba(255,80,80,.1);}
+.sb-empty{font-family:var(--mono);font-size:10px;color:var(--muted);opacity:.3;padding:4px 10px;}
 
-  /* ── sidebar ── */
-  .sidebar{
-    width:var(--sidebar-w);flex-shrink:0;
-    border-right:1px solid var(--border2);
-    background:rgba(0,0,0,.18);
-    display:flex;flex-direction:column;overflow:hidden;
-  }
-  .sb-section{padding:8px 0;border-bottom:1px solid var(--border2);}
-  .sb-section:last-child{border-bottom:none;flex:1;}
-  .sb-label{
-    font-family:var(--mono);font-size:9px;letter-spacing:.18em;
-    color:var(--muted);text-transform:uppercase;
-    padding:0 12px 4px;opacity:.5;
-  }
-  .sb-item{
-    display:flex;align-items:center;gap:8px;
-    padding:5px 12px;cursor:pointer;
-    font-family:var(--mono);font-size:11px;color:var(--muted);
-    transition:background .12s,color .12s;user-select:none;
-  }
-  .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text);}
-  .sb-item.active{background:rgba(127,255,178,.07);color:var(--accent);}
-  .sb-icon{width:14px;text-align:center;flex-shrink:0;opacity:.7;}
-  .sb-icon svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;display:block;}
-  .sb-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .sb-badge{
-    font-size:9px;background:rgba(127,255,178,.12);
-    color:var(--accent);border:1px solid rgba(127,255,178,.2);
-    padding:0 5px;border-radius:3px;
-  }
-  /* mini graph */
-  .sb-graph{padding:8px 12px 10px;}
-  .sb-graph-label{font-family:var(--mono);font-size:9px;color:var(--muted);opacity:.4;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;}
-  .sb-bars{display:flex;align-items:flex-end;gap:3px;height:24px;}
-  .sb-bar{
-    flex:1;border-radius:2px 2px 0 0;min-height:2px;
-    background:rgba(127,255,178,.15);
-    transition:height .5s cubic-bezier(.22,1,.36,1),background .2s;
-    animation:barGrow .6s cubic-bezier(.22,1,.36,1) both;
-  }
-  @keyframes barGrow{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}
-  .sb-bar:hover{background:rgba(127,255,178,.4);}
-  .sb-bar.latest{background:rgba(127,255,178,.4);}
+/* ── content / tabs ── */
+.content{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
 
-  /* recents in sidebar */
-  .sb-recent-empty{
-    font-family:var(--mono);font-size:10px;
-    color:var(--muted);opacity:.35;
-    padding:4px 12px;
-  }
+/* multi-tab strip */
+.tab-strip{
+  display:flex;align-items:flex-end;
+  padding:0 12px;gap:1px;height:36px;
+  background:rgba(0,0,0,.22);border-bottom:1px solid var(--border2);
+  flex-shrink:0;overflow-x:auto;overflow-y:hidden;
+}
+.tab-strip::-webkit-scrollbar{height:0;}
+.doc-tab{
+  display:flex;align-items:center;gap:6px;
+  padding:0 12px;height:28px;
+  font-family:var(--mono);font-size:11px;color:var(--muted);
+  border-radius:6px 6px 0 0;cursor:pointer;
+  border:1px solid transparent;border-bottom:none;
+  transition:all .15s;user-select:none;white-space:nowrap;flex-shrink:0;
+  position:relative;
+}
+.doc-tab:hover{color:var(--text);background:rgba(255,255,255,.03);}
+.doc-tab.active{
+  color:var(--text);background:var(--surface);
+  border-color:var(--border2);margin-bottom:-1px;z-index:1;
+}
+.doc-tab .tab-dot{width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .2s,box-shadow .2s;}
+.doc-tab.active .tab-dot{background:var(--accent);box-shadow:0 0 5px rgba(127,255,178,.6);}
+.doc-tab .tab-close{
+  width:14px;height:14px;display:flex;align-items:center;justify-content:center;
+  border-radius:3px;font-size:11px;line-height:1;color:var(--muted);
+  transition:color .1s,background .1s;margin-left:2px;
+}
+.doc-tab .tab-close:hover{color:var(--text);background:rgba(255,255,255,.1);}
+.tab-new{
+  display:flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:5px;
+  color:var(--muted);cursor:pointer;flex-shrink:0;
+  transition:background .1s,color .1s;font-size:16px;line-height:1;
+  margin-bottom:1px;
+}
+.tab-new:hover{background:rgba(255,255,255,.06);color:var(--text);}
 
-  /* ── content area ── */
-  .content{flex:1;min-width:0;display:flex;flex-direction:column;}
+/* doc panels */
+.doc-panel{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
+.doc-panel.active{display:flex;}
 
-  /* panels */
-  .panel{display:none;}
-  .panel.active{display:flex;flex-direction:column;flex:1;}
+/* inner panel switcher */
+.inner-tabs{display:flex;padding:0 12px;gap:1px;height:32px;align-items:flex-end;border-bottom:1px solid var(--border2);background:rgba(0,0,0,.1);flex-shrink:0;}
+.itab{
+  padding:0 10px;height:24px;display:flex;align-items:center;
+  font-family:var(--mono);font-size:10px;color:var(--muted);
+  border-radius:5px 5px 0 0;cursor:pointer;
+  border:1px solid transparent;border-bottom:none;
+  transition:all .15s;user-select:none;
+}
+.itab:hover{color:var(--text);}
+.itab.active{color:var(--text);background:var(--surface);border-color:var(--border2);margin-bottom:-1px;z-index:1;}
 
-  /* input panel */
-  .input-area{padding:18px;display:flex;flex-direction:column;gap:12px;flex:1;}
-  .editor-wrap{
-    position:relative;border-radius:7px;overflow:hidden;
-    border:1px solid var(--border);flex:1;
-    transition:border-color .2s,box-shadow .2s;
-  }
-  .editor-wrap:focus-within{
-    border-color:rgba(127,255,178,.3);
-    box-shadow:0 0 0 3px rgba(127,255,178,.06);
-  }
-  .ln{
-    position:absolute;left:0;top:0;bottom:0;width:38px;
-    background:rgba(0,0,0,.25);border-right:1px solid var(--border2);
-    padding:14px 7px 14px 0;overflow:hidden;
-    display:flex;flex-direction:column;align-items:flex-end;pointer-events:none;
-  }
-  .ln span{
-    font-family:var(--mono);font-size:11px;color:var(--muted);opacity:.3;
-    line-height:1.8;height:23.4px;display:block;
-  }
-  textarea{
-    width:100%;min-height:200px;background:var(--bg);border:none;
-    color:var(--text);font-family:var(--app-font);
-    font-size:13px;line-height:1.8;
-    padding:14px 14px 14px 48px;
-    resize:vertical;outline:none;display:block;
-  }
-  textarea::placeholder{color:var(--muted);opacity:.4;}
+.inner-panel{display:none;flex:1;min-height:0;overflow:hidden;flex-direction:column;}
+.inner-panel.active{display:flex;}
 
-  .hint{
-    font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.6;
-    padding:9px 12px;background:rgba(127,255,178,.03);
-    border:1px solid rgba(127,255,178,.07);border-radius:6px;
-  }
-  .hint b{color:var(--accent);}
+/* input area */
+.input-area{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1;}
+.editor-wrap{
+  position:relative;border-radius:7px;overflow:hidden;
+  border:1px solid var(--border);flex:1;min-height:160px;
+  transition:border-color .2s,box-shadow .2s;
+}
+.editor-wrap:focus-within{border-color:rgba(127,255,178,.3);box-shadow:0 0 0 3px rgba(127,255,178,.06);}
+.ln{
+  position:absolute;left:0;top:0;bottom:0;width:36px;
+  background:rgba(0,0,0,.25);border-right:1px solid var(--border2);
+  padding:13px 6px 13px 0;overflow:hidden;
+  display:flex;flex-direction:column;align-items:flex-end;pointer-events:none;
+}
+.ln span{font-family:var(--mono);font-size:11px;color:var(--muted);opacity:.3;line-height:1.8;height:23.4px;display:block;}
+textarea.tree-ta{
+  width:100%;min-height:160px;background:var(--bg);border:none;
+  color:var(--text);font-family:var(--app-font);
+  font-size:13px;line-height:1.8;padding:13px 13px 13px 46px;
+  resize:vertical;outline:none;display:block;
+}
+textarea.tree-ta::placeholder{color:var(--muted);opacity:.4;}
+.hint{font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.6;padding:8px 11px;background:rgba(127,255,178,.03);border:1px solid rgba(127,255,178,.07);border-radius:6px;}
+.hint b{color:var(--accent);}
 
-  /* toolbar */
-  .toolbar{
-    padding:10px 18px;border-top:1px solid var(--border2);
-    display:flex;gap:8px;align-items:center;
-    background:rgba(0,0,0,.15);flex-shrink:0;
-  }
-  .spacer{flex:1;}
+/* toolbar */
+.toolbar{padding:10px 16px;border-top:1px solid var(--border2);display:flex;gap:7px;align-items:center;background:rgba(0,0,0,.15);flex-shrink:0;}
+.spacer{flex:1;}
+button{font-family:var(--mono);font-size:11px;letter-spacing:.07em;border:none;cursor:pointer;padding:7px 15px;border-radius:6px;transition:all .15s cubic-bezier(.22,1,.36,1);text-transform:uppercase;position:relative;overflow:hidden;}
+button:active{transform:scale(.96) !important;}
+.btn-p{background:var(--accent);color:#0a0a0f;font-weight:700;box-shadow:0 2px 10px rgba(127,255,178,.22);}
+.btn-p:hover{box-shadow:0 4px 20px rgba(127,255,178,.4);transform:translateY(-1px);}
+.btn-dl{background:var(--accent2);color:#0a0a0f;font-weight:700;box-shadow:0 2px 10px rgba(255,127,80,.22);}
+.btn-dl:hover{box-shadow:0 4px 20px rgba(255,127,80,.4);transform:translateY(-1px);}
+.btn-g{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-g:hover{border-color:var(--muted);color:var(--text);}
 
-  /* buttons */
-  button{
-    font-family:var(--mono);font-size:11px;letter-spacing:.07em;
-    border:none;cursor:pointer;padding:7px 16px;border-radius:6px;
-    transition:all .15s cubic-bezier(.22,1,.36,1);
-    text-transform:uppercase;position:relative;overflow:hidden;
-  }
-  button:active{transform:scale(.96) !important;}
-  .btn-primary{
-    background:var(--accent);color:#0a0a0f;font-weight:700;
-    box-shadow:0 2px 10px rgba(127,255,178,.22);
-  }
-  .btn-primary:hover{box-shadow:0 4px 20px rgba(127,255,178,.4);transform:translateY(-1px);}
-  .btn-dl{
-    background:var(--accent2);color:#0a0a0f;font-weight:700;
-    box-shadow:0 2px 10px rgba(255,127,80,.22);
-  }
-  .btn-dl:hover{box-shadow:0 4px 20px rgba(255,127,80,.4);transform:translateY(-1px);}
-  .btn-ghost{
-    background:transparent;border:1px solid var(--border);color:var(--muted);
-  }
-  .btn-ghost:hover{border-color:var(--muted);color:var(--text);}
+/* error */
+.error-msg{
+  display:none;font-family:var(--mono);font-size:11px;color:#ff8080;
+  padding:7px 11px;background:rgba(255,80,80,.06);border:1px solid rgba(255,80,80,.14);
+  border-radius:6px;margin:0 16px 8px;gap:6px;align-items:center;
+  animation:shakeX .3s ease;
+}
+.error-msg.visible{display:flex;}
+@keyframes shakeX{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 
-  /* error */
-  .error-msg{
-    display:none;font-family:var(--mono);font-size:11px;color:#ff8080;
-    padding:7px 12px;background:rgba(255,100,100,.06);
-    border:1px solid rgba(255,100,100,.15);border-radius:6px;
-    margin:0 18px 10px;gap:7px;align-items:center;
-    animation:shakeX .3s ease;
-  }
-  .error-msg.visible{display:flex;}
-  @keyframes shakeX{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+/* files panel */
+.files-hd{padding:9px 16px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.1);flex-shrink:0;}
+.files-title{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
+.pill{font-family:var(--mono);font-size:10px;color:var(--accent);background:rgba(127,255,178,.1);border:1px solid rgba(127,255,178,.2);padding:2px 8px;border-radius:999px;}
+.files-list{display:flex;flex-direction:column;overflow-y:auto;flex:1;}
 
-  /* files panel */
-  .files-header{
-    padding:10px 18px;border-bottom:1px solid var(--border2);
-    display:flex;align-items:center;justify-content:space-between;
-    background:rgba(0,0,0,.1);flex-shrink:0;
-  }
-  .files-title{
-    font-family:var(--mono);font-size:10px;
-    letter-spacing:.14em;color:var(--muted);text-transform:uppercase;
-  }
-  .pill{
-    font-family:var(--mono);font-size:10px;
-    color:var(--accent);background:rgba(127,255,178,.1);
-    border:1px solid rgba(127,255,178,.2);padding:2px 9px;border-radius:999px;
-  }
-  .files-list{display:flex;flex-direction:column;overflow-y:auto;flex:1;}
+.file-item{border-top:1px solid var(--border2);animation:slideIn .25s cubic-bezier(.22,1,.36,1) both;}
+.file-item:first-child{border-top:none;}
+.file-hd{padding:8px 16px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;transition:background .1s;}
+.file-hd:hover{background:rgba(255,255,255,.02);}
+.fi-ico{width:14px;text-align:center;flex-shrink:0;opacity:.65;}
+.fi-ico svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.6;display:block;}
+.fi-wrap{flex:1;min-width:0;}
+.fi-name{font-family:var(--mono);font-size:12px;color:var(--text);}
+.fi-dir{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px;}
+.fi-ext{font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--border);padding:1px 5px;border-radius:3px;flex-shrink:0;}
+.chev{width:13px;height:13px;flex-shrink:0;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
+.chev svg{width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2;}
+.file-item.open .chev{transform:rotate(90deg);}
+.fc-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s cubic-bezier(.22,1,.36,1);}
+.file-item.open .fc-wrap{grid-template-rows:1fr;}
+.fc-in{overflow:hidden;}
+.fc-pad{padding:0 16px;transition:padding .28s cubic-bezier(.22,1,.36,1);}
+.file-item.open .fc-pad{padding:3px 16px 12px;}
+.file-content{
+  width:100%;min-height:80px;background:rgba(0,0,0,.28);
+  border:1px solid var(--border2);border-radius:6px;
+  color:var(--text);font-family:var(--app-font);
+  font-size:12px;line-height:1.7;padding:9px 11px;
+  resize:vertical;outline:none;display:block;
+  transition:border-color .2s,box-shadow .2s;
+}
+.file-content:focus{border-color:rgba(127,255,178,.24);box-shadow:0 0 0 3px rgba(127,255,178,.05);}
 
-  @keyframes slideIn{from{opacity:0;transform:translateX(-7px)}to{opacity:1;transform:translateX(0)}}
-  .file-item{
-    border-top:1px solid var(--border2);
-    animation:slideIn .25s cubic-bezier(.22,1,.36,1) both;
-  }
-  .file-item:first-child{border-top:none;}
-  .file-header{
-    padding:9px 18px;display:flex;align-items:center;gap:9px;
-    cursor:pointer;user-select:none;transition:background .12s;
-  }
-  .file-header:hover{background:rgba(255,255,255,.022);}
-  .fi-icon{width:16px;text-align:center;flex-shrink:0;opacity:.7;}
-  .fi-icon svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.6;display:block;}
-  .fi-wrap{flex:1;min-width:0;}
-  .fi-name{font-family:var(--mono);font-size:12px;color:var(--text);}
-  .fi-dir{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px;}
-  .fi-ext{
-    font-family:var(--mono);font-size:10px;color:var(--muted);
-    background:var(--border);padding:1px 6px;border-radius:3px;flex-shrink:0;
-  }
-  .chevron{
-    width:14px;height:14px;flex-shrink:0;color:var(--muted);
-    display:flex;align-items:center;justify-content:center;
-    transition:transform .25s cubic-bezier(.34,1.56,.64,1);
-  }
-  .chevron svg{width:9px;height:9px;stroke:currentColor;fill:none;stroke-width:2;}
-  .file-item.open .chevron{transform:rotate(90deg);}
-  .fc-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s cubic-bezier(.22,1,.36,1);}
-  .file-item.open .fc-wrap{grid-template-rows:1fr;}
-  .fc-inner{overflow:hidden;}
-  .fc-pad{padding:0 18px;transition:padding .28s cubic-bezier(.22,1,.36,1);}
-  .file-item.open .fc-pad{padding:3px 18px 14px;}
-  .file-content{
-    width:100%;min-height:90px;background:rgba(0,0,0,.28);
-    border:1px solid var(--border2);border-radius:6px;
-    color:var(--text);font-family:var(--app-font);
-    font-size:12px;line-height:1.7;
-    padding:10px 12px;resize:vertical;outline:none;display:block;
-    transition:border-color .2s,box-shadow .2s;
-  }
-  .file-content:focus{
-    border-color:rgba(127,255,178,.25);
-    box-shadow:0 0 0 3px rgba(127,255,178,.05);
-  }
+/* empty */
+.empty-state{padding:44px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.empty-ico{width:32px;height:32px;opacity:.16;display:flex;align-items:center;justify-content:center;}
+.empty-ico svg{width:32px;height:32px;stroke:var(--accent);fill:none;stroke-width:1.2;}
+.empty-txt{font-family:var(--mono);font-size:11px;color:var(--muted);opacity:.4;text-align:center;line-height:1.7;}
 
-  /* empty */
-  .empty-state{
-    padding:50px 20px;display:flex;flex-direction:column;
-    align-items:center;gap:12px;
-  }
-  .empty-icon{
-    width:36px;height:36px;opacity:.18;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .empty-icon svg{width:36px;height:36px;stroke:var(--accent);fill:none;stroke-width:1.2;}
-  .empty-text{font-family:var(--mono);font-size:11px;color:var(--muted);opacity:.45;text-align:center;line-height:1.7;}
+/* statusbar */
+.statusbar{height:21px;padding:0 12px;border-top:1px solid var(--border2);display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.2);flex-shrink:0;}
+.st{font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;align-items:center;gap:4px;}
+.st-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 4px var(--accent);animation:pulse 2.8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+.st-r{margin-left:auto;opacity:.32;}
 
-  /* statusbar */
-  .statusbar{
-    height:22px;padding:0 14px;border-top:1px solid var(--border2);
-    display:flex;align-items:center;gap:14px;
-    background:rgba(0,0,0,.2);flex-shrink:0;
-  }
-  .st-item{
-    font-family:var(--mono);font-size:10px;color:var(--muted);
-    display:flex;align-items:center;gap:4px;
-  }
-  .st-dot{
-    width:5px;height:5px;border-radius:50%;
-    background:var(--accent);box-shadow:0 0 4px var(--accent);
-    animation:pulse 2.8s ease-in-out infinite;
-  }
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
-  .st-right{margin-left:auto;opacity:.35;}
+/* ── spotlight ── */
+.sp-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(14px);z-index:300;display:none;align-items:flex-start;justify-content:center;padding-top:15vh;}
+.sp-overlay.open{display:flex;animation:fadeIn .14s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.sp-box{
+  width:min(580px,88vw);background:rgba(20,20,30,.97);
+  border:1px solid rgba(127,255,178,.14);border-radius:12px;overflow:hidden;
+  box-shadow:0 24px 80px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.05) inset;
+  animation:spPop .2s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes spPop{from{opacity:0;transform:scale(.93) translateY(-8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.sp-inp-wrap{display:flex;align-items:center;gap:9px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.05);}
+.sp-ico{width:14px;height:14px;opacity:.35;flex-shrink:0;}
+.sp-ico svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2;}
+#sp-in{flex:1;background:none;border:none;outline:none;font-family:var(--mono);font-size:15px;color:var(--text);letter-spacing:.02em;}
+#sp-in::placeholder{color:var(--muted);opacity:.4;}
+.sp-res{max-height:280px;overflow-y:auto;}
+.sp-sl{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--muted);opacity:.4;text-transform:uppercase;padding:8px 16px 2px;}
+.sp-row{display:flex;align-items:center;gap:9px;padding:7px 16px;cursor:pointer;transition:background .1s;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.sp-row:hover,.sp-row.sel{background:rgba(127,255,178,.08);color:var(--text);}
+.sp-row-i{width:16px;text-align:center;flex-shrink:0;}
+.sp-row-i svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;display:block;margin:0 auto;}
+.sp-row-n{flex:1;}
+.sp-row-h{font-size:10px;opacity:.35;}
+.sp-foot{padding:6px 16px;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:12px;}
+.sp-sc{font-family:var(--mono);font-size:9px;color:var(--muted);opacity:.32;display:flex;align-items:center;gap:3px;}
+.kbd{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:3px;padding:1px 4px;font-size:9px;}
 
-  /* ── spotlight ── */
-  .spotlight-overlay{
-    position:fixed;inset:0;background:rgba(0,0,0,.55);
-    backdrop-filter:blur(14px);z-index:300;
-    display:none;align-items:flex-start;justify-content:center;padding-top:16vh;
-  }
-  .spotlight-overlay.open{display:flex;animation:fadeIn .15s ease;}
-  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  .spotlight-box{
-    width:min(600px,88vw);
-    background:rgba(22,22,32,.96);
-    border:1px solid rgba(127,255,178,.14);
-    border-radius:13px;overflow:hidden;
-    box-shadow:0 24px 80px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.05) inset;
-    animation:spPop .22s cubic-bezier(.34,1.56,.64,1) both;
-  }
-  @keyframes spPop{from{opacity:0;transform:scale(.93) translateY(-8px)}to{opacity:1;transform:scale(1) translateY(0)}}
-  .sp-input-wrap{
-    display:flex;align-items:center;gap:10px;
-    padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.05);
-  }
-  .sp-search-icon{width:15px;height:15px;opacity:.4;flex-shrink:0;}
-  .sp-search-icon svg{width:15px;height:15px;stroke:var(--accent);fill:none;stroke-width:2;}
-  #sp-input{
-    flex:1;background:none;border:none;outline:none;
-    font-family:var(--mono);font-size:15px;color:var(--text);letter-spacing:.02em;
-  }
-  #sp-input::placeholder{color:var(--muted);opacity:.45;}
-  .sp-results{max-height:300px;overflow-y:auto;}
-  .sp-sec-label{
-    font-family:var(--mono);font-size:9px;letter-spacing:.18em;
-    color:var(--muted);opacity:.45;text-transform:uppercase;
-    padding:9px 18px 3px;
-  }
-  .sp-row{
-    display:flex;align-items:center;gap:10px;
-    padding:8px 18px;cursor:pointer;
-    transition:background .1s;
-    font-family:var(--mono);font-size:11px;color:var(--muted);
-  }
-  .sp-row:hover,.sp-row.sel{background:rgba(127,255,178,.08);color:var(--text);}
-  .sp-row-icon{width:18px;text-align:center;flex-shrink:0;}
-  .sp-row-icon svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;display:block;margin:0 auto;}
-  .sp-row-name{flex:1;}
-  .sp-row-hint{font-size:10px;opacity:.38;}
-  .sp-footer{
-    padding:7px 18px;border-top:1px solid rgba(255,255,255,.05);
-    display:flex;gap:14px;align-items:center;
-  }
-  .sp-shortcut{font-family:var(--mono);font-size:9px;color:var(--muted);opacity:.35;display:flex;align-items:center;gap:3px;}
-  .kbd{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:3px;padding:1px 4px;font-size:9px;}
+/* ── notification panel ── */
+.notif-panel{
+  position:fixed;top:0;right:-290px;bottom:0;width:272px;
+  background:rgba(12,12,20,.97);backdrop-filter:blur(20px);
+  border-left:1px solid var(--border);z-index:250;
+  display:flex;flex-direction:column;
+  box-shadow:-8px 0 32px rgba(0,0,0,.5);
+  transition:right .3s cubic-bezier(.22,1,.36,1);
+}
+.notif-panel.open{right:0;}
+.notif-hd{
+  padding:44px 14px 10px;border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);
+}
+.notif-hd-btns{display:flex;gap:4px;align-items:center;}
+.notif-btn{
+  font-family:var(--mono);font-size:9px;color:var(--muted);
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:4px;padding:2px 7px;cursor:pointer;transition:all .1s;letter-spacing:.04em;
+}
+.notif-btn:hover{color:var(--text);border-color:var(--muted);}
+.notif-btn.danger:hover{color:#ff8080;border-color:rgba(255,80,80,.4);background:rgba(255,80,80,.06);}
+.notif-list{flex:1;overflow-y:auto;padding:8px;}
+.nc{background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;margin-bottom:7px;animation:slideIn .25s cubic-bezier(.22,1,.36,1) both;}
+.nc-hd{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
+.nc-app{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;}
+.nc-time{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:auto;opacity:.4;}
+.nc-title{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);margin-bottom:1px;}
+.nc-body{font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.5;}
+.notif-empty{text-align:center;padding:32px 14px;font-family:var(--mono);font-size:11px;color:var(--muted);opacity:.3;}
 
-  /* notification panel */
-  .notif-panel{
-    position:fixed;top:0;right:-300px;bottom:0;width:280px;
-    background:rgba(14,14,22,.97);backdrop-filter:blur(20px);
-    border-left:1px solid var(--border);z-index:250;
-    display:flex;flex-direction:column;
-    box-shadow:-10px 0 36px rgba(0,0,0,.5);
-    transition:right .32s cubic-bezier(.22,1,.36,1);
-  }
-  .notif-panel.open{right:0;}
-  .notif-hd{
-    padding:46px 16px 12px;border-bottom:1px solid var(--border2);
-    font-family:var(--mono);font-size:12px;font-weight:700;
-    color:var(--text);letter-spacing:.04em;
-    display:flex;align-items:center;justify-content:space-between;
-  }
-  .notif-close{cursor:pointer;color:var(--muted);font-size:14px;transition:color .12s;}
-  .notif-close:hover{color:var(--text);}
-  .notif-list{flex:1;overflow-y:auto;padding:10px;}
-  .nc{
-    background:rgba(255,255,255,.03);border:1px solid var(--border2);
-    border-radius:9px;padding:10px 12px;margin-bottom:8px;
-    animation:slideIn .25s cubic-bezier(.22,1,.36,1) both;
-  }
-  .nc-hd{display:flex;align-items:center;gap:7px;margin-bottom:3px;}
-  .nc-app{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;}
-  .nc-time{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:auto;opacity:.45;}
-  .nc-title{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;}
-  .nc-body{font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.5;}
-  .notif-empty{text-align:center;padding:36px 16px;font-family:var(--mono);font-size:11px;color:var(--muted);opacity:.35;}
+/* toast */
+.toast{
+  position:fixed;bottom:26px;right:26px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:11px 14px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 28px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04) inset;
+  transform:translateY(70px) scale(.94);opacity:0;
+  transition:all .38s cubic-bezier(.34,1.56,.64,1);
+  z-index:400;pointer-events:none;
+}
+.toast.show{transform:translateY(0) scale(1);opacity:1;}
+.toast-ico{width:26px;height:26px;border-radius:50%;background:rgba(127,255,178,.1);border:1px solid rgba(127,255,178,.24);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.toast-ico svg{width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:2.2;}
+.toast-t{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);}
+.toast-s{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px;}
 
-  /* toast */
-  .toast{
-    position:fixed;bottom:28px;right:28px;
-    background:var(--surface2);border:1px solid var(--border);
-    border-radius:11px;padding:12px 16px;
-    display:flex;align-items:center;gap:11px;
-    box-shadow:0 8px 28px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04) inset;
-    transform:translateY(70px) scale(.94);opacity:0;
-    transition:all .4s cubic-bezier(.34,1.56,.64,1);
-    z-index:400;pointer-events:none;
-  }
-  .toast.show{transform:translateY(0) scale(1);opacity:1;}
-  .toast-icon{
-    width:28px;height:28px;border-radius:50%;
-    background:rgba(127,255,178,.1);border:1px solid rgba(127,255,178,.25);
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  }
-  .toast-icon svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2.2;}
-  .toast-title{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);}
-  .toast-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px;}
-
-  ::-webkit-scrollbar{width:4px;height:4px;}
-  ::-webkit-scrollbar-track{background:transparent;}
-  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
-  ::-webkit-scrollbar-thumb:hover{background:var(--muted);}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+::-webkit-scrollbar-thumb:hover{background:var(--muted);}
 </style>
 </head>
 <body>
 
 <!-- Spotlight -->
-<div class="spotlight-overlay" id="spotlight" onclick="spOverlayClick(event)">
-  <div class="spotlight-box">
-    <div class="sp-input-wrap">
-      <div class="sp-search-icon"><svg viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg></div>
-      <input id="sp-input" placeholder="コマンドを検索..." autocomplete="off" oninput="spFilter(this.value)" onkeydown="spKey(event)">
+<div class="sp-overlay" id="spotlight" onclick="spBgClick(event)">
+  <div class="sp-box">
+    <div class="sp-inp-wrap">
+      <div class="sp-ico"><svg viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg></div>
+      <input id="sp-in" placeholder="コマンドを検索..." autocomplete="off" oninput="spFilter(this.value)" onkeydown="spKey(event)">
     </div>
-    <div class="sp-results" id="sp-results"></div>
-    <div class="sp-footer">
-      <span class="sp-shortcut"><span class="kbd">↑↓</span> 移動</span>
-      <span class="sp-shortcut"><span class="kbd">↵</span> 実行</span>
-      <span class="sp-shortcut"><span class="kbd">esc</span> 閉じる</span>
+    <div class="sp-res" id="sp-res"></div>
+    <div class="sp-foot">
+      <span class="sp-sc"><span class="kbd">↑↓</span> 移動</span>
+      <span class="sp-sc"><span class="kbd">↵</span> 実行</span>
+      <span class="sp-sc"><span class="kbd">esc</span> 閉じる</span>
     </div>
   </div>
 </div>
@@ -533,11 +419,12 @@
 <div class="notif-panel" id="notif-panel">
   <div class="notif-hd">
     通知センター
-    <span class="notif-close" onclick="closeNotif()">&#x2715;</span>
+    <div class="notif-hd-btns">
+      <span class="notif-btn danger" onclick="clearNotifs()">すべて消去</span>
+      <span class="notif-btn" onclick="closeNotif()">&#x2715;</span>
+    </div>
   </div>
-  <div class="notif-list" id="notif-list">
-    <div class="notif-empty">通知はありません</div>
-  </div>
+  <div class="notif-list" id="notif-list"><div class="notif-empty">通知はありません</div></div>
 </div>
 
 <div class="page">
@@ -551,61 +438,64 @@
   <div class="menubar" id="menubar">
     <span class="mb-logo">t&rarr;z</span>
 
-    <!-- File menu -->
-    <div class="mb-menu" id="menu-file">
-      <span class="mb-menu-label" onclick="toggleMenu('menu-file')">File</span>
-      <div class="mb-dropdown">
-        <div class="mb-drop-item" onclick="closeMenus();parseTree()">Parse Tree <span class="mb-shortcut">&#x2318;P</span></div>
-        <div class="mb-drop-item" onclick="closeMenus();downloadZip()">Download ZIP <span class="mb-shortcut">&#x2318;S</span></div>
-        <div class="mb-separator"></div>
-        <div class="mb-drop-item danger" onclick="closeMenus();clearAll()">Clear All <span class="mb-shortcut">&#x2318;&#x21E7;K</span></div>
+    <div class="mb-menu" id="mn-file">
+      <span class="mb-label" onclick="toggleMenu('mn-file')">File</span>
+      <div class="mb-dd">
+        <div class="mb-di" onclick="closeMenus();newTab()">New Tab <span class="mb-sc">&#x2318;T</span></div>
+        <div class="mb-sep"></div>
+        <div class="mb-di" onclick="closeMenus();activeParseTree()">Parse Tree <span class="mb-sc">&#x2318;P</span></div>
+        <div class="mb-di" onclick="closeMenus();activeDownload()">Download ZIP <span class="mb-sc">&#x2318;S</span></div>
+        <div class="mb-sep"></div>
+        <div class="mb-di danger" onclick="closeMenus();activeClear()">Clear Tab <span class="mb-sc">&#x2318;&#x21E7;K</span></div>
       </div>
     </div>
 
-    <!-- View menu -->
-    <div class="mb-menu" id="menu-view">
-      <span class="mb-menu-label" onclick="toggleMenu('menu-view')">View</span>
-      <div class="mb-dropdown">
-        <div class="mb-drop-item" onclick="closeMenus();switchPanel('input')">Tree Input <span class="mb-shortcut">&#x2318;1</span></div>
-        <div class="mb-drop-item" onclick="closeMenus();switchPanel('files')">Files <span class="mb-shortcut">&#x2318;2</span></div>
-        <div class="mb-separator"></div>
-        <div class="mb-drop-item" onclick="closeMenus();toggleNotif()">通知センター <span class="mb-shortcut">&#x2318;N</span></div>
+    <div class="mb-menu" id="mn-view">
+      <span class="mb-label" onclick="toggleMenu('mn-view')">View</span>
+      <div class="mb-dd">
+        <div class="mb-di" onclick="closeMenus();activeInnerTab('input')">Tree Input <span class="mb-sc">&#x2318;1</span></div>
+        <div class="mb-di" onclick="closeMenus();activeInnerTab('files')">Files <span class="mb-sc">&#x2318;2</span></div>
+        <div class="mb-sep"></div>
+        <div class="mb-di" onclick="closeMenus();openNotif()">通知センター <span class="mb-sc">&#x2318;N</span></div>
       </div>
     </div>
 
-    <!-- Font menu — no spotlight, direct toggle here as extra Mac feature -->
-    <div class="mb-menu" id="menu-font">
-      <span class="mb-menu-label" onclick="toggleMenu('menu-font')">Font</span>
-      <div class="mb-dropdown">
-        <div class="mb-drop-item" id="font-opt-design" onclick="closeMenus();setFont('design')">Design Mono (Space Mono) <span class="mb-shortcut">active</span></div>
-        <div class="mb-drop-item" id="font-opt-system" onclick="closeMenus();setFont('system')">System Mono (Menlo/Consolas)</div>
+    <div class="mb-menu" id="mn-font">
+      <span class="mb-label" onclick="toggleMenu('mn-font')">Font</span>
+      <div class="mb-dd">
+        <div class="mb-di checked" id="fd-design" onclick="closeMenus();setFont('design')">Design Mono</div>
+        <div class="mb-di" id="fd-system" onclick="closeMenus();setFont('system')">System Mono</div>
       </div>
     </div>
 
-    <!-- right side -->
     <div class="mb-right">
-      <!-- Wi-Fi indicator (decorative) -->
-      <div class="mb-right-btn" title="Network">
-        <svg viewBox="0 0 16 16"><path d="M1 5 Q8 0 15 5"/><path d="M3 8 Q8 4 13 8"/><path d="M5.5 11 Q8 8.5 10.5 11"/><circle cx="8" cy="14" r="1" fill="currentColor"/></svg>
+      <!-- wi-fi decorative -->
+      <div class="mb-rb" title="Network">
+        <svg viewBox="0 0 16 16"><path d="M1 5Q8 0 15 5"/><path d="M3 8Q8 4 13 8"/><path d="M5.5 11Q8 8.5 10.5 11"/><circle cx="8" cy="14" r="1" fill="currentColor"/></svg>
       </div>
-      <!-- Battery (decorative) -->
-      <div class="mb-right-btn" title="Power">
-        <svg viewBox="0 0 18 10"><rect x="1" y="1" width="14" height="8" rx="2"/><rect x="2" y="2" width="10" height="6" rx="1" fill="currentColor" opacity=".5"/><path d="M15.5 3.5 v3" stroke-linecap="round"/></svg>
+      <!-- battery decorative -->
+      <div class="mb-rb" title="Power">
+        <svg viewBox="0 0 18 10"><rect x="1" y="1" width="14" height="8" rx="2"/><rect x="2" y="2" width="9" height="6" rx="1" fill="currentColor" opacity=".5"/><path d="M15.5 3.5v3" stroke-linecap="round"/></svg>
       </div>
-      <!-- Download / Save shortcut -->
-      <div class="mb-right-btn" onclick="downloadZip()" title="Download ZIP (&#x2318;S)">
-        <svg viewBox="0 0 14 14"><path d="M7 2v7M4 6l3 3 3-3"/><path d="M2 11h10"/></svg>
+      <!-- new tab -->
+      <div class="mb-rb" onclick="newTab()" title="New Tab (&#x2318;T)">
+        <svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>
+        <span>New Tab</span>
+      </div>
+      <!-- save -->
+      <div class="mb-rb" onclick="activeDownload()" title="Download ZIP (&#x2318;S)">
+        <svg viewBox="0 0 14 14"><path d="M7 2v7M4 6l3 3 3-3"/><path d="M2 12h10"/></svg>
         <span>Save</span>
       </div>
-      <!-- Spotlight -->
-      <div class="mb-right-btn" onclick="openSpotlight()" title="Spotlight (&#x2318;Space)">
+      <!-- search -->
+      <div class="mb-rb" onclick="openSpotlight()" title="Spotlight (&#x2318;Space)">
         <svg viewBox="0 0 14 14"><circle cx="5.5" cy="5.5" r="4"/><line x1="9" y1="9" x2="13" y2="13"/></svg>
         <span>Search</span>
       </div>
-      <!-- Notification -->
-      <div class="mb-right-btn" onclick="toggleNotif()" title="通知センター">
-        <svg viewBox="0 0 14 14"><path d="M7 1a4 4 0 0 1 4 4v3l1.5 2h-11L3 8V5a4 4 0 0 1 4-4z"/><path d="M5.5 11.5 Q7 13 8.5 11.5"/></svg>
-        <span id="notif-badge-count"></span>
+      <!-- notifications -->
+      <div class="mb-rb" onclick="openNotif()" title="通知センター (&#x2318;N)" id="notif-mb-btn">
+        <svg viewBox="0 0 14 14"><path d="M7 1a4 4 0 0 1 4 4v3l1.5 2h-11L3 8V5a4 4 0 0 1 4-4z"/><path d="M5.5 11.5Q7 13 8.5 11.5"/></svg>
+        <span class="notif-dot" id="notif-dot"></span>
       </div>
       <span id="mb-clock"></span>
     </div>
@@ -614,7 +504,7 @@
   <!-- mac window -->
   <div class="mac-window">
     <div class="titlebar">
-      <div class="traffic-lights">
+      <div class="tls">
         <div class="tl tl-r"></div>
         <div class="tl tl-y"></div>
         <div class="tl tl-g"></div>
@@ -623,90 +513,30 @@
     </div>
 
     <div class="window-body">
-      <!-- sidebar: only recents + graph (navigation removed, lives in menubar/tabs) -->
+      <!-- sidebar: recents only -->
       <div class="sidebar">
-        <div class="sb-section">
-          <div class="sb-label">Recents</div>
-          <div id="sb-recents"><div class="sb-recent-empty">&#x2014;</div></div>
-        </div>
-        <div class="sb-section">
-          <div class="sb-label">Activity</div>
-          <div class="sb-graph">
-            <div class="sb-graph-label">file count</div>
-            <div class="sb-bars" id="sb-bars">
-              <div class="sb-bar" style="height:8%"></div>
-              <div class="sb-bar" style="height:14%"></div>
-              <div class="sb-bar" style="height:6%"></div>
-              <div class="sb-bar" style="height:20%"></div>
-              <div class="sb-bar" style="height:10%"></div>
-              <div class="sb-bar" style="height:5%"></div>
-              <div class="sb-bar" style="height:3%"></div>
-            </div>
-          </div>
+        <div class="sb-sec">
+          <div class="sb-lbl">Recents</div>
+          <div id="sb-recents"><div class="sb-empty">&mdash;</div></div>
         </div>
       </div>
 
-      <!-- content -->
+      <!-- content with multi-tab -->
       <div class="content">
-
-        <!-- tab strip (Tree Input / Files only — no overlap with sidebar) -->
-        <div style="display:flex;border-bottom:1px solid var(--border2);background:rgba(0,0,0,.2);padding:0 14px;gap:2px;height:36px;align-items:flex-end;flex-shrink:0;">
-          <div id="tab-input" class="tab-btn active" onclick="switchPanel('input')">tree input</div>
-          <div id="tab-files" class="tab-btn" onclick="switchPanel('files')">
-            files
-            <span id="tab-badge" style="display:none;font-size:9px;background:rgba(127,255,178,.14);color:var(--accent);border:1px solid rgba(127,255,178,.2);padding:0 5px;border-radius:3px;margin-left:4px;"></span>
-          </div>
+        <!-- doc tab strip -->
+        <div class="tab-strip" id="tab-strip">
+          <!-- tabs injected by JS -->
+          <div class="tab-new" onclick="newTab()" title="新しいタブ">+</div>
         </div>
 
-        <!-- INPUT -->
-        <div class="panel active" id="panel-input">
-          <div class="input-area">
-            <div class="editor-wrap">
-              <div class="ln" id="ln"><span>1</span></div>
-              <textarea id="tree-input" spellcheck="false"
-                placeholder="my-project
- &#x251C; server.js
- &#x251C; package.json
- &#x2514; public
-     &#x2514; index.html"
-                oninput="updateLn(this)"></textarea>
-            </div>
-            <div class="hint">
-              <b>&#x251C; &#x2514; &#x2502;</b> などのツリー文字か、スペース&#x2F;タブのインデントに対応。最初の行がルートディレクトリ名になります。
-            </div>
-          </div>
-          <div id="error-msg" class="error-msg"></div>
-          <div class="toolbar">
-            <button class="btn-primary" onclick="parseTree()">&#x25B6; Parse</button>
-            <button class="btn-ghost" onclick="clearAll()">Clear</button>
-          </div>
-        </div>
-
-        <!-- FILES -->
-        <div class="panel" id="panel-files">
-          <div class="files-header">
-            <span class="files-title">Edit file contents</span>
-            <span class="pill" id="file-count">0 files</span>
-          </div>
-          <div class="files-list" id="files-list">
-            <div class="empty-state">
-              <div class="empty-icon"><svg viewBox="0 0 36 36"><path d="M6 8h14l4 4h6v20H6z"/></svg></div>
-              <div class="empty-text">ツリーを入力して Parse してください</div>
-            </div>
-          </div>
-          <div class="toolbar">
-            <button class="btn-ghost" onclick="switchPanel('input')">&larr; Edit Tree</button>
-            <span class="spacer"></span>
-            <button class="btn-dl" onclick="downloadZip()">&#x2193; Download ZIP</button>
-          </div>
-        </div>
+        <!-- doc panels container -->
+        <div id="doc-panels" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;"></div>
 
         <!-- statusbar -->
         <div class="statusbar">
-          <div class="st-item"><div class="st-dot"></div><span id="status-text">ready</span></div>
-          <div class="st-item st-right" id="st-right">tree &rarr; zip &nbsp;&#x2502;&nbsp; &#x2318;Space search</div>
+          <div class="st"><div class="st-dot"></div><span id="status-text">ready</span></div>
+          <div class="st st-r">tree &rarr; zip &nbsp;|&nbsp; &#x2318;Space search</div>
         </div>
-
       </div>
     </div>
   </div>
@@ -714,131 +544,263 @@
 
 <!-- toast -->
 <div class="toast" id="toast">
-  <div class="toast-icon"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>
-  <div>
-    <div class="toast-title" id="toast-title"></div>
-    <div class="toast-sub"   id="toast-sub"></div>
-  </div>
+  <div class="toast-ico"><svg viewBox="0 0 14 14"><polyline points="2,7 6,11 12,3"/></svg></div>
+  <div><div class="toast-t" id="toast-t"></div><div class="toast-s" id="toast-s"></div></div>
 </div>
 
-<style>
-  /* tab buttons (inline to avoid pollution) */
-  .tab-btn{
-    padding:0 14px;height:28px;display:flex;align-items:center;
-    font-family:var(--mono);font-size:11px;color:var(--muted);
-    border-radius:6px 6px 0 0;cursor:pointer;
-    border:1px solid transparent;border-bottom:none;
-    transition:all .18s;user-select:none;
-  }
-  .tab-btn:hover{color:var(--text);background:rgba(255,255,255,.03);}
-  .tab-btn.active{
-    color:var(--text);background:var(--surface);
-    border-color:var(--border2);margin-bottom:-1px;z-index:1;
-  }
-</style>
-
 <script>
-/* ── clock ── */
+// ─── clock ───
 function tickClock(){
-  const d=new Date();
-  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const h=String(d.getHours()).padStart(2,'0');
-  const m=String(d.getMinutes()).padStart(2,'0');
+  const d=new Date(),days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const h=String(d.getHours()).padStart(2,'0'),m=String(d.getMinutes()).padStart(2,'0');
   document.getElementById('mb-clock').textContent=days[d.getDay()]+' '+h+':'+m;
 }
-tickClock(); setInterval(tickClock,10000);
+tickClock();setInterval(tickClock,10000);
 
-/* ── keyboard ── */
+// ─── keyboard ───
 document.addEventListener('keydown',e=>{
   const mod=e.metaKey||e.ctrlKey;
   if(mod&&e.code==='Space'){e.preventDefault();openSpotlight();}
-  if(mod&&e.key==='p'){e.preventDefault();parseTree();}
-  if(mod&&e.key==='s'){e.preventDefault();downloadZip();}
-  if(mod&&e.key==='1'){e.preventDefault();switchPanel('input');}
-  if(mod&&e.key==='2'){e.preventDefault();switchPanel('files');}
-  if(mod&&e.key==='n'){e.preventDefault();toggleNotif();}
+  if(mod&&e.key==='t'){e.preventDefault();newTab();}
+  if(mod&&e.key==='p'){e.preventDefault();activeParseTree();}
+  if(mod&&e.key==='s'){e.preventDefault();activeDownload();}
+  if(mod&&e.key==='1'){e.preventDefault();activeInnerTab('input');}
+  if(mod&&e.key==='2'){e.preventDefault();activeInnerTab('files');}
+  if(mod&&e.key==='n'){e.preventDefault();openNotif();}
   if(e.key==='Escape'){spClose();closeNotif();closeMenus();}
 });
-document.addEventListener('click',e=>{
-  if(!e.target.closest('.mb-menu'))closeMenus();
-});
+document.addEventListener('click',e=>{if(!e.target.closest('.mb-menu'))closeMenus();});
 
-/* ── menus ── */
-function toggleMenu(id){
-  const isOpen=document.getElementById(id).classList.contains('open');
-  closeMenus();
-  if(!isOpen)document.getElementById(id).classList.add('open');
-}
-function closeMenus(){
-  document.querySelectorAll('.mb-menu.open').forEach(m=>m.classList.remove('open'));
-}
+// ─── menus ───
+function toggleMenu(id){const o=document.getElementById(id).classList.contains('open');closeMenus();if(!o)document.getElementById(id).classList.add('open');}
+function closeMenus(){document.querySelectorAll('.mb-menu.open').forEach(m=>m.classList.remove('open'));}
 
-/* ── font ── */
-let currentFont='design';
+// ─── font ───
+let curFont='design';
 function setFont(f){
-  currentFont=f;
-  const root=document.documentElement;
-  if(f==='system'){
-    root.style.setProperty('--app-font','var(--sys)');
-  }else{
-    root.style.setProperty('--app-font','var(--mono)');
+  curFont=f;
+  document.documentElement.style.setProperty('--app-font',f==='system'?'var(--sys)':'var(--mono)');
+  document.getElementById('fd-design').classList.toggle('checked',f==='design');
+  document.getElementById('fd-system').classList.toggle('checked',f==='system');
+  pushNotif('Font','フォント変更',f==='system'?'System Mono':'Space Mono');
+}
+
+// ─── localStorage recents ───
+const LS_KEY='ttz-recents-v2';
+function loadRecents(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch{return[];}}
+function saveRecents(arr){try{localStorage.setItem(LS_KEY,JSON.stringify(arr));}catch{}}
+function addRecent(name,treeText,files){
+  let arr=loadRecents();
+  arr=arr.filter(r=>r.name!==name);
+  arr.unshift({name,treeText,files,ts:Date.now()});
+  if(arr.length>8)arr=arr.slice(0,8);
+  saveRecents(arr);
+  renderRecents();
+}
+function removeRecent(name){
+  saveRecents(loadRecents().filter(r=>r.name!==name));
+  renderRecents();
+}
+function renderRecents(){
+  const arr=loadRecents();
+  const el=document.getElementById('sb-recents');
+  if(!arr.length){el.innerHTML='<div class="sb-empty">&mdash;</div>';return;}
+  el.innerHTML=arr.map(r=>`
+    <div class="sb-item" onclick="openRecent('${escAttr(r.name)}')" title="${escAttr(r.name)}">
+      <div class="sb-ico"><svg viewBox="0 0 12 12"><path d="M1 2h6l2 2h2v7H1z"/></svg></div>
+      <span class="sb-name">${esc(r.name)}</span>
+      <span class="sb-cnt">${r.files}</span>
+      <span class="sb-del" onclick="event.stopPropagation();removeRecent('${escAttr(r.name)}')" title="削除">&times;</span>
+    </div>`).join('');
+}
+function openRecent(name){
+  const arr=loadRecents();
+  const r=arr.find(x=>x.name===name);
+  if(!r)return;
+  const tid=newTab(r.name);
+  const ta=document.querySelector(`#panel-${tid} .tree-ta`);
+  if(ta){ta.value=r.treeText;updateLn(ta,tid);}
+  const files=r.files_data||[];
+  if(files.length){
+    renderFilesForTab(tid,files);
+    switchInnerTab(tid,'files');
+    updateTabLabel(tid,r.name);
+    updateTabBadge(tid,files.length);
   }
-  document.getElementById('font-opt-design').querySelector('.mb-shortcut').textContent=f==='design'?'active':'';
-  document.getElementById('font-opt-system').querySelector('.mb-shortcut')||
-    document.getElementById('font-opt-system').insertAdjacentHTML('beforeend','<span class="mb-shortcut"></span>');
-  document.querySelectorAll('#font-opt-design .mb-shortcut,#font-opt-system .mb-shortcut').forEach(el=>el.textContent='');
-  const active=document.getElementById('font-opt-'+f);
-  let sh=active.querySelector('.mb-shortcut');
-  if(!sh){active.insertAdjacentHTML('beforeend','<span class="mb-shortcut">active</span>');}
-  else{sh.textContent='active';}
-  pushNotif('Font','フォント変更',f==='system'?'System Mono に変更しました':'Space Mono に変更しました');
+}
+function escAttr(s){return s.replace(/'/g,"&#39;").replace(/"/g,"&quot;");}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+// ─── multi-tab state ───
+let tabCounter=0;
+let activeTabId=null;
+const tabs={};// id -> {name, files:[]}
+
+function newTab(name){
+  tabCounter++;
+  const id='t'+tabCounter;
+  tabs[id]={name:name||'new project',files:[]};
+  createTabEl(id,name||'new project');
+  createDocPanel(id);
+  setActiveTab(id);
+  renderRecents();
+  return id;
 }
 
-/* ── line numbers ── */
-function updateLn(ta){
-  const n=ta.value.split('\n').length;
-  document.getElementById('ln').innerHTML=
-    Array.from({length:Math.max(n,1)},(_,i)=>`<span>${i+1}</span>`).join('');
+function createTabEl(id,label){
+  const strip=document.getElementById('tab-strip');
+  const newBtn=strip.querySelector('.tab-new');
+  const el=document.createElement('div');
+  el.className='doc-tab';el.id='tabn-'+id;
+  el.innerHTML=`<span class="tab-dot"></span><span class="tab-label">${esc(label)}</span><span class="tab-close" onclick="event.stopPropagation();closeTab('${id}')">&#x2715;</span>`;
+  el.addEventListener('click',()=>setActiveTab(id));
+  strip.insertBefore(el,newBtn);
 }
-updateLn(document.getElementById('tree-input'));
 
-/* ── panel / tab ── */
-function switchPanel(name){
-  ['input','files'].forEach(t=>{
-    document.getElementById('tab-'+t).classList.toggle('active',t===name);
-    document.getElementById('panel-'+t).classList.toggle('active',t===name);
+function updateTabLabel(id,label){
+  tabs[id].name=label;
+  const el=document.getElementById('tabn-'+id);
+  if(el)el.querySelector('.tab-label').textContent=label;
+  if(activeTabId===id)document.getElementById('win-title').textContent='tree-to-zip \u2014 '+label;
+}
+function updateTabBadge(id,n){
+  const el=document.getElementById('tabn-'+id);
+  if(!el)return;
+  let b=el.querySelector('.tab-badge-cnt');
+  if(n>0){
+    if(!b){b=document.createElement('span');b.className='tab-badge-cnt';b.style.cssText='font-size:9px;background:rgba(127,255,178,.14);color:var(--accent);border:1px solid rgba(127,255,178,.2);padding:0 4px;border-radius:3px;margin-left:2px;';el.insertBefore(b,el.querySelector('.tab-close'));}
+    b.textContent=n;
+  }else if(b){b.remove();}
+}
+
+function closeTab(id){
+  if(Object.keys(tabs).length<=1){activeClear();return;}
+  delete tabs[id];
+  document.getElementById('tabn-'+id)?.remove();
+  document.getElementById('panel-'+id)?.remove();
+  const remaining=Object.keys(tabs);
+  if(activeTabId===id)setActiveTab(remaining[remaining.length-1]);
+}
+
+function setActiveTab(id){
+  activeTabId=id;
+  document.querySelectorAll('.doc-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.doc-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tabn-'+id)?.classList.add('active');
+  document.getElementById('panel-'+id)?.classList.add('active');
+  document.getElementById('win-title').textContent='tree-to-zip \u2014 '+(tabs[id]?.name||'new project');
+  setStatus('ready');
+}
+
+// ─── create doc panel ───
+function createDocPanel(id){
+  const container=document.getElementById('doc-panels');
+  const panel=document.createElement('div');
+  panel.className='doc-panel';panel.id='panel-'+id;
+  panel.innerHTML=`
+    <!-- inner tabs -->
+    <div class="inner-tabs">
+      <div class="itab active" id="it-input-${id}" onclick="switchInnerTab('${id}','input')">tree input</div>
+      <div class="itab" id="it-files-${id}" onclick="switchInnerTab('${id}','files')">
+        files<span class="itab-badge" id="itbadge-${id}" style="display:none;font-size:9px;background:rgba(127,255,178,.14);color:var(--accent);border:1px solid rgba(127,255,178,.2);padding:0 4px;border-radius:3px;margin-left:4px;"></span>
+      </div>
+    </div>
+    <!-- INPUT inner panel -->
+    <div class="inner-panel active" id="ip-input-${id}">
+      <div class="input-area">
+        <div class="editor-wrap">
+          <div class="ln" id="ln-${id}"><span>1</span></div>
+          <textarea class="tree-ta" id="ta-${id}" spellcheck="false"
+            placeholder="my-project&#10; &#x251C; server.js&#10; &#x251C; package.json&#10; &#x2514; public&#10;     &#x2514; index.html"
+            oninput="updateLn(this,'${id}')"></textarea>
+        </div>
+        <div class="hint"><b>&#x251C; &#x2514; &#x2502;</b> などのツリー文字か、スペース&#x2F;タブのインデントに対応。</div>
+      </div>
+      <div id="err-${id}" class="error-msg"></div>
+      <div class="toolbar">
+        <button class="btn-p" onclick="parseTreeTab('${id}')">&#x25B6; Parse</button>
+        <button class="btn-g" onclick="clearTab('${id}')">Clear</button>
+      </div>
+    </div>
+    <!-- FILES inner panel -->
+    <div class="inner-panel" id="ip-files-${id}">
+      <div class="files-hd">
+        <span class="files-title">Edit file contents</span>
+        <span class="pill" id="fc-${id}">0 files</span>
+      </div>
+      <div class="files-list" id="fl-${id}">
+        <div class="empty-state">
+          <div class="empty-ico"><svg viewBox="0 0 36 36"><path d="M6 8h14l4 4h6v20H6z"/></svg></div>
+          <div class="empty-txt">ツリーを入力して Parse してください</div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn-g" onclick="switchInnerTab('${id}','input')">&larr; Edit Tree</button>
+        <span class="spacer"></span>
+        <button class="btn-dl" onclick="downloadZipTab('${id}')">&#x2193; Download ZIP</button>
+      </div>
+    </div>`;
+  container.appendChild(panel);
+  // init line numbers
+  const ta=panel.querySelector('.tree-ta');
+  updateLn(ta,id);
+}
+
+function switchInnerTab(id,name){
+  ['input','files'].forEach(n=>{
+    document.getElementById('it-'+n+'-'+id)?.classList.toggle('active',n===name);
+    document.getElementById('ip-'+n+'-'+id)?.classList.toggle('active',n===name);
   });
 }
 
-/* ── icons (SVG, no emoji) ── */
+// helpers that act on active tab
+function activeParseTree(){if(activeTabId)parseTreeTab(activeTabId);}
+function activeDownload(){if(activeTabId)downloadZipTab(activeTabId);}
+function activeClear(){if(activeTabId)clearTab(activeTabId);}
+function activeInnerTab(name){if(activeTabId)switchInnerTab(activeTabId,name);}
+
+// ─── line numbers ───
+function updateLn(ta,id){
+  const n=ta.value.split('\n').length;
+  const el=document.getElementById('ln-'+id);
+  if(el)el.innerHTML=Array.from({length:Math.max(n,1)},(_,i)=>`<span>${i+1}</span>`).join('');
+}
+
+// ─── file icons ───
 function fileIcon(name){
   const ext=name.split('.').pop().toLowerCase();
-  const jsLike=['js','ts','jsx','tsx','mjs'];
-  if(jsLike.includes(ext))return`<svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="2"/><text x="2.5" y="10" font-size="6" fill="currentColor" font-family="monospace">JS</text></svg>`;
-  if(ext==='html')return`<svg viewBox="0 0 14 14"><path d="M2 2h10v10H2z"/><path d="M4 5h6M4 7h4"/></svg>`;
+  if(['js','ts','jsx','tsx','mjs'].includes(ext))return`<svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="2"/><text x="2.5" y="10.5" font-size="6.5" fill="currentColor" font-family="monospace" font-weight="bold">JS</text></svg>`;
+  if(ext==='html')return`<svg viewBox="0 0 14 14"><path d="M2 2h10v10H2z"/><path d="M4 5h6M4 8h4"/></svg>`;
   if(['css','scss','sass'].includes(ext))return`<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5"/><path d="M4 7h6M7 4v6"/></svg>`;
   if(ext==='json')return`<svg viewBox="0 0 14 14"><path d="M3 2v10M11 2v10M5 4Q2 7 5 10M9 4Q12 7 9 10"/></svg>`;
   if(['md','txt'].includes(ext))return`<svg viewBox="0 0 14 14"><path d="M3 3h8M3 6h8M3 9h5"/></svg>`;
-  if(['py'].includes(ext))return`<svg viewBox="0 0 14 14"><path d="M4 2h4a2 2 0 0 1 2 2v2H4V4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v1H6a2 2 0 0 1-2-2v-2h6v-2"/></svg>`;
+  if(ext==='py')return`<svg viewBox="0 0 14 14"><path d="M4 2h4a2 2 0 0 1 2 2v2H4V4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v1H6a2 2 0 0 1-2-2V9h6V7"/></svg>`;
   return`<svg viewBox="0 0 14 14"><path d="M3 1h6l3 3v9H3z"/><path d="M9 1v3h3"/></svg>`;
 }
 
-/* ── parse ── */
-function parseTree(){
-  const raw=document.getElementById('tree-input').value.trim();
-  showError('');
-  if(!raw){showError('ツリーテキストを入力してください。');return;}
+// ─── parse ───
+function parseTreeTab(id){
+  const ta=document.getElementById('ta-'+id);
+  if(!ta)return;
+  const raw=ta.value.trim();
+  showErr(id,'');
+  if(!raw){showErr(id,'ツリーテキストを入力してください。');return;}
   const files=extractFiles(raw);
-  if(!files.length){showError('ファイルが検出できませんでした。');return;}
+  if(!files.length){showErr(id,'ファイルが検出できませんでした。');return;}
   const root=raw.split('\n')[0].replace(/[│├└─┤┐┘┼╔╗╚╝╠╣╦╩╬\s]/g,'').trim();
-  document.getElementById('win-title').textContent='tree-to-zip \u2014 '+root;
-  renderFiles(files);
-  switchPanel('files');
+  updateTabLabel(id,root);
+  renderFilesForTab(id,files);
+  switchInnerTab(id,'files');
+  updateTabBadge(id,files.length);
+  tabs[id].files=files;
   setStatus(files.length+' files parsed');
-  const b=document.getElementById('tab-badge');
-  b.textContent=files.length;b.style.display='inline';
-  animateGraph(files.length);
-  addRecent(root,files.length);
+  // save to localStorage (store content too so it can be reopened)
+  const filesData=files.map(f=>({path:f.path,content:''}));
+  addRecent(root,raw,files.length);
+  // store full data
+  const arr=loadRecents();
+  const r=arr.find(x=>x.name===root);
+  if(r){r.files_data=filesData;saveRecents(arr);}
   pushNotif('tree-to-zip',root+' をパース',files.length+' ファイルを検出');
 }
 
@@ -848,13 +810,11 @@ function extractFiles(text){
   const root=lines[0].replace(/[│├└─┤┐┘┼╔╗╚╝╠╣╦╩╬\s]/g,'').trim();
   const dirs=[];
   for(let i=1;i<lines.length;i++){
-    const line=lines[i];
-    if(!line.trim())continue;
+    const line=lines[i];if(!line.trim())continue;
     const clean=line.replace(/├/g,' ').replace(/└/g,' ').replace(/│/g,' ').replace(/─/g,' ').replace(/[┤┐┘┼╔╗╚╝╠╣╦╩╬]/g,' ');
     const sp=clean.length-clean.trimStart().length;
     const depth=Math.max(1,Math.ceil(sp/2));
-    const name=clean.trim();
-    if(!name)continue;
+    const name=clean.trim();if(!name)continue;
     if(looksLikeFile(name)){
       const parents=dirs.slice(0,depth-1).filter(Boolean);
       files.push({path:[root,...parents,name].join('/')});
@@ -867,11 +827,15 @@ function looksLikeFile(n){
   return['makefile','dockerfile','procfile','readme','license','gitignore','gitattributes','.env','.babelrc','.eslintrc'].includes(n.toLowerCase())||n.startsWith('.');
 }
 
-/* ── render ── */
-function renderFiles(files){
-  const list=document.getElementById('files-list');
+// ─── render files ───
+function renderFilesForTab(id,files){
+  const list=document.getElementById('fl-'+id);
+  const fc=document.getElementById('fc-'+id);
+  const badge=document.getElementById('itbadge-'+id);
+  if(!list)return;
   list.innerHTML='';
-  document.getElementById('file-count').textContent=files.length+' file'+(files.length!==1?'s':'');
+  fc.textContent=files.length+' file'+(files.length!==1?'s':'');
+  badge.textContent=files.length;badge.style.display='inline';
   files.forEach((f,i)=>{
     const fname=f.path.split('/').pop();
     const fdir=f.path.split('/').slice(0,-1).join('/');
@@ -880,31 +844,38 @@ function renderFiles(files){
     el.className='file-item'+(i===0?' open':'');
     el.style.animationDelay=i*.04+'s';
     el.innerHTML=`
-      <div class="file-header" onclick="toggleFile(this.parentElement)">
-        <div class="fi-icon">${fileIcon(fname)}</div>
+      <div class="file-hd" onclick="toggleFile(this.parentElement)">
+        <div class="fi-ico">${fileIcon(fname)}</div>
         <div class="fi-wrap">
-          <div class="fi-name">${fname}</div>
-          ${fdir?`<div class="fi-dir">${fdir}/</div>`:''}
+          <div class="fi-name">${esc(fname)}</div>
+          ${fdir?`<div class="fi-dir">${esc(fdir)}/</div>`:''}
         </div>
         ${ext?`<span class="fi-ext">.${ext}</span>`:''}
-        <div class="chevron"><svg viewBox="0 0 10 10"><polyline points="3,2 7,5 3,8"/></svg></div>
+        <div class="chev"><svg viewBox="0 0 10 10"><polyline points="3,2 7,5 3,8"/></svg></div>
       </div>
-      <div class="fc-wrap"><div class="fc-inner"><div class="fc-pad">
-        <textarea class="file-content" placeholder="// ${fname} の内容" data-path="${f.path}"></textarea>
+      <div class="fc-wrap"><div class="fc-in"><div class="fc-pad">
+        <textarea class="file-content" placeholder="// ${esc(fname)} の内容" data-path="${escAttr(f.path)}">${f.content||''}</textarea>
       </div></div></div>`;
     list.appendChild(el);
   });
 }
 function toggleFile(item){item.classList.toggle('open');}
 
-/* ── download ── */
-async function downloadZip(){
-  const tas=document.querySelectorAll('.file-content');
-  if(!tas.length){showError('まずツリーをパースしてください。');return;}
+// ─── download ───
+async function downloadZipTab(id){
+  const panel=document.getElementById('panel-'+id);
+  if(!panel)return;
+  const tas=panel.querySelectorAll('.file-content');
+  if(!tas.length){showErr(id,'まずツリーをパースしてください。');return;}
   const zip=new JSZip();
   tas.forEach(ta=>{
     const p=ta.dataset.path.replace(/\\/g,'/').replace(/^\//,'');
     zip.file(p,ta.value,{binary:false});
+    // update saved content
+    const arr=loadRecents();
+    const root=p.split('/')[0];
+    const r=arr.find(x=>x.name===root);
+    if(r&&r.files_data){const fd=r.files_data.find(f=>f.path===p);if(fd)fd.content=ta.value;saveRecents(arr);}
   });
   const root=tas[0].dataset.path.split('/')[0]||'project';
   try{
@@ -917,103 +888,30 @@ async function downloadZip(){
     showToast(root+'.zip',tas.length+' files packed');
     setStatus(root+'.zip downloaded');
     pushNotif('tree-to-zip',root+'.zip をダウンロード',tas.length+' ファイルをパック');
-  }catch(e){showError('ZIP生成に失敗: '+e.message);}
+  }catch(e){showErr(id,'ZIP生成に失敗: '+e.message);}
 }
 
-/* ── clear ── */
-function clearAll(){
-  const ta=document.getElementById('tree-input');
-  ta.value='';updateLn(ta);
-  document.getElementById('files-list').innerHTML=`<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 36 36"><path d="M6 8h14l4 4h6v20H6z"/></svg></div><div class="empty-text">ツリーを入力して Parse してください</div></div>`;
-  document.getElementById('file-count').textContent='0 files';
-  document.getElementById('tab-badge').style.display='none';
-  document.getElementById('win-title').textContent='tree-to-zip \u2014 new project';
-  showError('');setStatus('ready');switchPanel('input');
+// ─── clear tab ───
+function clearTab(id){
+  const ta=document.getElementById('ta-'+id);
+  if(ta){ta.value='';updateLn(ta,id);}
+  const list=document.getElementById('fl-'+id);
+  if(list)list.innerHTML=`<div class="empty-state"><div class="empty-ico"><svg viewBox="0 0 36 36"><path d="M6 8h14l4 4h6v20H6z"/></svg></div><div class="empty-txt">ツリーを入力して Parse してください</div></div>`;
+  const fc=document.getElementById('fc-'+id);if(fc)fc.textContent='0 files';
+  const badge=document.getElementById('itbadge-'+id);if(badge)badge.style.display='none';
+  updateTabLabel(id,'new project');updateTabBadge(id,0);
+  showErr(id,'');setStatus('ready');switchInnerTab(id,'input');
 }
 
-/* ── graph ── */
-const gHist=[8,14,6,20,10,5,3];
-function animateGraph(n){
-  gHist.push(Math.min(n,40));if(gHist.length>7)gHist.shift();
-  const mx=Math.max(...gHist,1);
-  document.getElementById('sb-bars').innerHTML=gHist.map((v,i)=>{
-    const p=Math.round(v/mx*100);
-    const last=i===gHist.length-1;
-    return`<div class="sb-bar${last?' latest':''}" style="height:${Math.max(p,3)}%;animation-delay:${i*.04}s"></div>`;
-  }).join('');
-}
-
-/* ── recents ── */
-const recents=[];
-function addRecent(name,count){
-  recents.unshift({name,count});
-  if(recents.length>4)recents.pop();
-  document.getElementById('sb-recents').innerHTML=recents.map(r=>
-    `<div class="sb-item">
-      <div class="sb-icon"><svg viewBox="0 0 12 12"><path d="M1 2h6l2 2h2v7H1z"/></svg></div>
-      <span class="sb-name">${r.name}</span>
-      <span class="sb-badge">${r.count}</span>
-    </div>`).join('');
-}
-
-/* ── spotlight ── */
-const SP_CMDS=[
-  {icon:`<svg viewBox="0 0 14 14"><polyline points="2,12 2,2 12,2"/><polyline points="7,7 12,2"/><path d="M7 12h5v-5"/></svg>`,  name:'Parse Tree',          hint:'ツリーをパース',         act:()=>{spClose();parseTree();}},
-  {icon:`<svg viewBox="0 0 14 14"><path d="M7 2v8M4 7l3 3 3-3"/><path d="M2 12h10"/></svg>`,                                   name:'Download ZIP',         hint:'ZIPを保存',              act:()=>{spClose();downloadZip();}},
-  {icon:`<svg viewBox="0 0 14 14"><path d="M2 2h10v10H2z"/><path d="M5 5l4 4M9 5l-4 4"/></svg>`,                               name:'Clear All',            hint:'入力をリセット',         act:()=>{spClose();clearAll();}},
-  {icon:`<svg viewBox="0 0 14 14"><path d="M2 3h10M2 7h10M2 11h6"/></svg>`,                                                     name:'Tree Input',           hint:'ビュー切り替え',         act:()=>{spClose();switchPanel('input');}},
-  {icon:`<svg viewBox="0 0 14 14"><path d="M1 2h8l2 2h2v9H1z"/></svg>`,                                                         name:'Files',                hint:'ビュー切り替え',         act:()=>{spClose();switchPanel('files');}},
-  {icon:`<svg viewBox="0 0 14 14"><rect x="2" y="2" width="10" height="10" rx="2"/><path d="M5 6h4M5 9h2"/></svg>`,            name:'通知センター',          hint:'通知を開く',             act:()=>{spClose();toggleNotif();}},
-  {icon:`<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="3"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2"/></svg>`,                  name:'Font: Design Mono',    hint:'Space Mono に変更',      act:()=>{spClose();setFont('design');}},
-  {icon:`<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="3"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2"/></svg>`,                  name:'Font: System Mono',    hint:'Menlo/Consolas に変更',  act:()=>{spClose();setFont('system');}},
-];
-let spIdx=0,spFiltered=SP_CMDS;
-
-function openSpotlight(){
-  document.getElementById('spotlight').classList.add('open');
-  setTimeout(()=>document.getElementById('sp-input').focus(),40);
-  spFilter('');
-}
-function spClose(){
-  document.getElementById('spotlight').classList.remove('open');
-  document.getElementById('sp-input').value='';
-}
-function spOverlayClick(e){if(e.target.id==='spotlight')spClose();}
-
-function spFilter(q){
-  spFiltered=q?SP_CMDS.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.hint.includes(q)):SP_CMDS;
-  spIdx=0;
-  const el=document.getElementById('sp-results');
-  if(!spFiltered.length){el.innerHTML='<div style="padding:18px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);opacity:.4">結果なし</div>';return;}
-  el.innerHTML='<div class="sp-sec-label">コマンド</div>'+
-    spFiltered.map((r,i)=>`
-      <div class="sp-row${i===0?' sel':''}" data-idx="${i}" onclick="spFiltered[${i}].act()">
-        <div class="sp-row-icon">${r.icon}</div>
-        <span class="sp-row-name">${r.name}</span>
-        <span class="sp-row-hint">${r.hint}</span>
-      </div>`).join('');
-}
-function spKey(e){
-  const rows=document.querySelectorAll('.sp-row');
-  if(!rows.length)return;
-  if(e.key==='ArrowDown'){spIdx=Math.min(spIdx+1,rows.length-1);spHighlight(rows);e.preventDefault();}
-  if(e.key==='ArrowUp')  {spIdx=Math.max(spIdx-1,0);spHighlight(rows);e.preventDefault();}
-  if(e.key==='Enter')    {rows[spIdx]&&rows[spIdx].click();}
-}
-function spHighlight(rows){
-  rows.forEach((r,i)=>r.classList.toggle('sel',i===spIdx));
-  rows[spIdx].scrollIntoView({block:'nearest'});
-}
-
-/* ── notifications ── */
+// ─── notifications ───
 const notifs=[];
-let notifCount=0;
+let unreadCount=0;
 function pushNotif(app,title,body){
   notifs.unshift({app,title,body,time:new Date()});
-  notifCount++;
+  unreadCount++;
   renderNotifs();
-  const nb=document.getElementById('notif-badge-count');
-  nb.textContent=notifCount>0?notifCount:'';
+  const dot=document.getElementById('notif-dot');
+  dot.textContent=unreadCount;dot.classList.add('visible');
 }
 function renderNotifs(){
   const el=document.getElementById('notif-list');
@@ -1021,26 +919,67 @@ function renderNotifs(){
   const fmt=d=>d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
   el.innerHTML=notifs.map((n,i)=>`
     <div class="nc" style="animation-delay:${i*.04}s">
-      <div class="nc-hd"><span class="nc-app">${n.app}</span><span class="nc-time">${fmt(n.time)}</span></div>
-      <div class="nc-title">${n.title}</div>
-      <div class="nc-body">${n.body}</div>
+      <div class="nc-hd"><span class="nc-app">${esc(n.app)}</span><span class="nc-time">${fmt(n.time)}</span></div>
+      <div class="nc-title">${esc(n.title)}</div>
+      <div class="nc-body">${esc(n.body)}</div>
     </div>`).join('');
 }
-function toggleNotif(){document.getElementById('notif-panel').classList.toggle('open');}
+function clearNotifs(){notifs.length=0;renderNotifs();}
+function openNotif(){
+  document.getElementById('notif-panel').classList.add('open');
+  // mark as read
+  unreadCount=0;
+  const dot=document.getElementById('notif-dot');
+  dot.textContent='';dot.classList.remove('visible');
+}
 function closeNotif(){document.getElementById('notif-panel').classList.remove('open');}
+function toggleNotif(){document.getElementById('notif-panel').classList.contains('open')?closeNotif():openNotif();}
 
-/* ── helpers ── */
-function showError(msg){
-  const el=document.getElementById('error-msg');
-  el.textContent=msg;el.classList.toggle('visible',!!msg);
+// ─── spotlight ───
+const SP=[
+  {i:`<svg viewBox="0 0 14 14"><path d="M2 3h10M2 7h10M2 11h6"/></svg>`,n:'Tree Input',h:'ビュー: tree input',a:()=>{spClose();activeInnerTab('input');}},
+  {i:`<svg viewBox="0 0 14 14"><path d="M1 2h8l2 2h2v9H1z"/></svg>`,n:'Files',h:'ビュー: files',a:()=>{spClose();activeInnerTab('files');}},
+  {i:`<svg viewBox="0 0 14 14"><polyline points="2,12 2,2 12,2"/><polyline points="7,7 12,2"/><path d="M7 12h5v-5"/></svg>`,n:'Parse Tree',h:'ツリーをパース',a:()=>{spClose();activeParseTree();}},
+  {i:`<svg viewBox="0 0 14 14"><path d="M7 2v7M4 6l3 3 3-3"/><path d="M2 12h10"/></svg>`,n:'Download ZIP',h:'ZIPを保存',a:()=>{spClose();activeDownload();}},
+  {i:`<svg viewBox="0 0 14 14"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>`,n:'New Tab',h:'新しいタブを開く',a:()=>{spClose();newTab();}},
+  {i:`<svg viewBox="0 0 14 14"><path d="M2 2h10v10H2z"/><path d="M5 5l4 4M9 5l-4 4"/></svg>`,n:'Clear Tab',h:'現在のタブをリセット',a:()=>{spClose();activeClear();}},
+  {i:`<svg viewBox="0 0 14 14"><rect x="2" y="2" width="10" height="10" rx="2"/><path d="M5 6h4M5 9h2"/></svg>`,n:'通知センター',h:'通知を開く',a:()=>{spClose();openNotif();}},
+  {i:`<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="3"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2"/></svg>`,n:'Font: Design Mono',h:'Space Mono に変更',a:()=>{spClose();setFont('design');}},
+  {i:`<svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="3"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2"/></svg>`,n:'Font: System Mono',h:'Menlo/Consolas に変更',a:()=>{spClose();setFont('system');}},
+];
+let spIdx=0,spF=SP;
+function openSpotlight(){document.getElementById('spotlight').classList.add('open');setTimeout(()=>document.getElementById('sp-in').focus(),40);spFilter('');}
+function spClose(){document.getElementById('spotlight').classList.remove('open');document.getElementById('sp-in').value='';}
+function spBgClick(e){if(e.target.id==='spotlight')spClose();}
+function spFilter(q){
+  spF=q?SP.filter(c=>c.n.toLowerCase().includes(q.toLowerCase())||c.h.includes(q)):SP;
+  spIdx=0;
+  const el=document.getElementById('sp-res');
+  if(!spF.length){el.innerHTML='<div style="padding:16px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);opacity:.38">結果なし</div>';return;}
+  el.innerHTML='<div class="sp-sl">コマンド</div>'+
+    spF.map((r,i)=>`<div class="sp-row${i===0?' sel':''}" data-idx="${i}" onclick="spF[${i}].a()"><div class="sp-row-i">${r.i}</div><span class="sp-row-n">${r.n}</span><span class="sp-row-h">${r.h}</span></div>`).join('');
 }
+function spKey(e){
+  const rows=document.querySelectorAll('.sp-row');if(!rows.length)return;
+  if(e.key==='ArrowDown'){spIdx=Math.min(spIdx+1,rows.length-1);spHl(rows);e.preventDefault();}
+  if(e.key==='ArrowUp'){spIdx=Math.max(spIdx-1,0);spHl(rows);e.preventDefault();}
+  if(e.key==='Enter'){rows[spIdx]&&rows[spIdx].click();}
+}
+function spHl(rows){rows.forEach((r,i)=>r.classList.toggle('sel',i===spIdx));rows[spIdx].scrollIntoView({block:'nearest'});}
+
+// ─── helpers ───
+function showErr(id,msg){const el=document.getElementById('err-'+id);if(!el)return;el.textContent=msg;el.classList.toggle('visible',!!msg);}
 function setStatus(msg){document.getElementById('status-text').textContent=msg;}
-function showToast(title,sub){
-  document.getElementById('toast-title').textContent=title;
-  document.getElementById('toast-sub').textContent=sub;
-  const t=document.getElementById('toast');
-  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);
+function showToast(t,s){
+  document.getElementById('toast-t').textContent=t;
+  document.getElementById('toast-s').textContent=s;
+  const el=document.getElementById('toast');el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3200);
 }
+
+// ─── init ───
+renderRecents();
+newTab();
 </script>
 </body>
 </html>
