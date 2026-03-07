@@ -506,35 +506,46 @@ function parseTree() {
 function extractFiles(text) {
   const lines = text.split('\n');
   const files = [];
-  const pathStack = [];
 
-  // First line is root dir name
-  const rootName = lines[0].replace(/[│├└─\s]/g, '').trim();
+  // First line is root dir name (strip any tree chars)
+  const rootName = lines[0].replace(/[│├└─┤┐┘┼╔╗╚╝╠╣╦╩╬\s]/g, '').trim();
+
+  // dirStack holds directory names at each depth level
+  // index 0 = depth 1 (direct children of root)
+  const dirStack = [];
 
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
     if (!line.trim()) continue;
 
-    // Remove tree chars: │ ├ └ ─ and their variants
-    const cleanLine = line.replace(/[│├└─┤┐┘┼╔╗╚╝╠╣╦╩╬]/g, ' ');
+    // Remove tree drawing chars, replace with spaces to preserve indent width
+    const cleanLine = line
+      .replace(/├/g, ' ')
+      .replace(/└/g, ' ')
+      .replace(/│/g, ' ')
+      .replace(/─/g, ' ')
+      .replace(/[┤┐┘┼╔╗╚╝╠╣╦╩╬]/g, ' ');
 
-    // Calculate depth by leading spaces
-    const depth = Math.floor((cleanLine.length - cleanLine.trimStart().length) / 2) + 1;
+    // Depth = number of leading spaces / 2 (tree chars are 2 chars wide typically)
+    // But be flexible: count leading spaces, divide by smallest indent unit
+    const leadingSpaces = cleanLine.length - cleanLine.trimStart().length;
+    const depth = Math.max(1, Math.ceil(leadingSpaces / 2));
 
     const name = cleanLine.trim();
     if (!name) continue;
 
-    // Adjust stack to current depth
-    pathStack.length = depth - 1;
-    pathStack[depth - 1] = name;
+    const isFile = looksLikeFile(name);
 
-    // If no extension, treat as directory (skip), otherwise it's a file
-    if (!name.includes('.') && !name.includes('rc') && !looksLikeFile(name)) {
-      // directory — just keep in stack
-    } else {
-      // It's a file
-      const fullPath = [rootName, ...pathStack.slice(0, depth)].join('/');
+    if (isFile) {
+      // Build path: root / ...parent dirs up to depth-1 / filename
+      const parents = dirStack.slice(0, depth - 1).filter(Boolean);
+      const fullPath = [rootName, ...parents, name].join('/');
       files.push({ path: fullPath, content: '' });
+    } else {
+      // It's a directory — store in stack at this depth level
+      dirStack[depth - 1] = name;
+      // Clear deeper entries (we've gone back up)
+      dirStack.length = depth;
     }
   }
 
@@ -542,8 +553,9 @@ function extractFiles(text) {
 }
 
 function looksLikeFile(name) {
-  // heuristic: has extension, or known filenames
-  const known = ['makefile', 'dockerfile', 'procfile', 'readme', 'license', 'gitignore', 'gitattributes', '.env', '.babelrc', '.eslintrc'];
+  if (name.includes('.')) return true;
+  const known = ['makefile', 'dockerfile', 'procfile', 'readme', 'license',
+                 'gitignore', 'gitattributes', '.env', '.babelrc', '.eslintrc'];
   return known.includes(name.toLowerCase()) || name.startsWith('.');
 }
 
@@ -594,9 +606,11 @@ async function downloadZip() {
   const zip = new JSZip();
 
   textareas.forEach(ta => {
-    const path = ta.dataset.path;
+    // Normalize: replace any backslash with forward slash, strip leading slash
+    const path = ta.dataset.path.replace(/\\/g, '/').replace(/^\//, '');
     const content = ta.value;
-    zip.file(path, content);
+    // Only add as file (JSZip handles intermediate folders automatically)
+    zip.file(path, content, { binary: false });
   });
 
   // Determine zip name from root
