@@ -589,7 +589,7 @@ function setFont(f){
   const fontMap={
     design:"'Space Mono',monospace",
     system:"'ui-monospace','Menlo','Monaco','Cascadia Mono','Segoe UI Mono','Courier New',monospace",
-    eng:   "'Share Tech Mono','Share Tech','OCR-A','OCR-B',monospace"
+    eng:   "'KikaiChokokuJIS','Share Tech Mono','OCR-A','OCR-B',monospace"
   };
   document.documentElement.style.setProperty('--app-font',fontMap[f]||fontMap.design);
   document.getElementById('fd-design').classList.toggle('checked',f==='design');
